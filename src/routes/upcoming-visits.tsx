@@ -1,8 +1,7 @@
 import { createFileRoute } from '@tanstack/react-router'
-import { Calendar, Clock, User, MessageSquare } from 'lucide-react'
+import { Calendar, Clock, User } from 'lucide-react'
 
 import { useVisits } from '@/hooks/useVisits'
-import { sanitizeText } from '@/utils/sanitize'
 
 export const Route = createFileRoute('/upcoming-visits')({
 	component: UpcomingVisitsRoute,
@@ -13,21 +12,6 @@ const dayFormatter = new Intl.DateTimeFormat('nl', {
 	month: 'long',
 	day: 'numeric',
 })
-
-const summarizeDuration = (minutes: number) => {
-	if (minutes < 60) {
-		return `${minutes} ${minutes === 1 ? 'minuut' : 'minuten'}`
-	}
-
-	const hours = Math.floor(minutes / 60)
-	const remainingMinutes = minutes % 60
-
-	if (remainingMinutes === 0) {
-		return `${hours} ${hours === 1 ? 'uur' : 'uren'}`
-	}
-
-	return `${hours} uur en ${remainingMinutes} minuten`
-}
 
 const calculateDepartureTime = (arrivalTime: string, durationMinutes: number): string => {
 	const [hours, minutes] = arrivalTime.split(':').map(Number)
@@ -147,7 +131,6 @@ function UpcomingVisitsRoute() {
 							<tbody>
 								{visits.map(visit => {
 									const departureTime = calculateDepartureTime(visit.time, visit.durationMinutes)
-									const durationText = summarizeDuration(visit.durationMinutes)
 
 									return (
 										<tr key={visit.id}>
