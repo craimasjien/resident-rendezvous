@@ -128,7 +128,7 @@ Deliver a simple, friendly web app that lets the family coordinate visits with G
 ```typescript
 export interface Visit {
   id: string; // Firestore document ID
-  date: string; // YYYY-MM-DD
+  date: string; // yyyy-MM-dd
   time: string; // HH:mm (24-hour)
   visitorName: string;
   description?: string; // Optional note, sanitized before render
