@@ -1,0 +1,9 @@
+---
+description: Relevant when executing node/npm commands
+alwaysApply: false
+---
+# Cursor Rules
+
+## Whenever you use npm
+
+1. Use the host system's nvm installed version of NodeJS.
