@@ -46,7 +46,7 @@ export default function DailyAgenda({ selectedDate }: DailyAgendaProps) {
   }, [visits, selectedDate])
 
   const handleDeleteVisit = async (visit: Visit) => {
-    if (!window.confirm(`Are you sure you want to delete the visit by ${visit.visitorName}?`)) {
+    if (!window.confirm(`Weet je zeker dat je ${visit.visitorName}'s bezoek wilt verwijderen?`)) {
       return
     }
 

@@ -247,8 +247,6 @@ export default function BookingModal({
 									id="duration"
 									className="input"
 									type="number"
-									min="15"
-									step="15"
 									value={durationMinutes}
 									onChange={(e) =>
 										setDurationMinutes(Number.parseInt(e.target.value, 10) || 0)
