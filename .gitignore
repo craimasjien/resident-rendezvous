@@ -208,4 +208,4 @@ dist
 .history
 .ionide
 
-# End of https://www.toptal.com/developers/gitignore/api/macos,linux,visualstudiocode,node
+# End of https://www.toptal.com/developers/gitignore/api/macos,linux,visualstudiocode,node.env.production
