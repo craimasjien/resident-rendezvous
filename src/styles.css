@@ -20,3 +20,39 @@ code {
 .datetimepicker {
   max-width: 100%;
 }
+
+/* Mobile-specific spacing improvements */
+@media screen and (max-width: 768px) {
+  .daily-agenda header {
+    margin-bottom: 1.5rem !important;
+  }
+
+  .daily-agenda .title {
+    margin-bottom: 0.75rem !important;
+  }
+
+  .daily-agenda .subtitle {
+    margin-bottom: 0.5rem !important;
+  }
+
+  .card-content {
+    padding: 1.25rem !important;
+  }
+
+  /* Stack visit card content vertically on mobile */
+  .visit-card-mobile-layout {
+    flex-direction: column !important;
+  }
+
+  .visit-card-mobile-layout .visit-card-buttons {
+    margin-left: 0 !important;
+    margin-top: 1rem !important;
+    width: 100%;
+    justify-content: flex-end;
+  }
+
+  /* Better spacing for visit details on mobile */
+  .visit-detail-item {
+    margin-bottom: 1rem !important;
+  }
+}

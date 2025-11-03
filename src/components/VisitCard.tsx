@@ -52,51 +52,59 @@ export default function VisitCard({
     <article
       className={`card mb-4 ${isOwner ? 'is-success is-light' : ''}`}
     >
-      <div className="card-content">
-        <div className="is-flex is-justify-content-space-between is-align-items-flex-start mb-4">
-          <div className="is-flex-grow-1">
+      <div className="card-content" style={{ padding: '1.5rem' }}>
+        <div className="is-flex visit-card-mobile-layout is-justify-content-space-between is-align-items-flex-start mb-4">
+          <div className="is-flex-grow-1" style={{ width: '100%' }}>
             <div className="is-flex is-align-items-center mb-4">
-              <User size={20} className="has-text-primary" style={{ marginRight: '0.5rem' }} />
+              <User size={20} className="has-text-primary" style={{ marginRight: '0.75rem', flexShrink: 0 }} />
               <h3 className="title is-4 mb-0">
                 {visit.visitorName}
               </h3>
             </div>
 
             <div className="content">
-              <div className="is-flex is-align-items-center mb-3">
-                <Clock size={16} className="has-text-grey" style={{ marginRight: '0.5rem' }} />
+              <div className="is-flex is-align-items-center visit-detail-item" style={{ flexWrap: 'wrap', gap: '0.5rem' }}>
+                <Clock size={18} className="has-text-grey" style={{ marginRight: '0.75rem', flexShrink: 0 }} />
                 <span className="has-text-weight-semibold">Geplande aankomst:</span>
-                <span style={{ marginLeft: '0.5rem' }}>{visit.time}</span>
+                <span>{visit.time}</span>
               </div>
 
-              <div className="is-flex is-align-items-center mb-3">
-                <Clock size={16} className="has-text-grey" style={{ marginRight: '0.5rem' }} />
+              <div className="is-flex is-align-items-center visit-detail-item" style={{ flexWrap: 'wrap', gap: '0.5rem' }}>
+                <Clock size={18} className="has-text-grey" style={{ marginRight: '0.75rem', flexShrink: 0 }} />
                 <span className="has-text-weight-semibold">Gepland vertrek:</span>
-                <span style={{ marginLeft: '0.5rem' }}>{departureTime}</span>
+                <span>{departureTime}</span>
               </div>
 
-              <div className="is-flex is-align-items-center mb-3">
-                <Calendar size={16} className="has-text-grey" style={{ marginRight: '0.5rem' }} />
+              <div className="is-flex is-align-items-center visit-detail-item" style={{ flexWrap: 'wrap', gap: '0.5rem' }}>
+                <Calendar size={18} className="has-text-grey" style={{ marginRight: '0.75rem', flexShrink: 0 }} />
                 <span className="has-text-weight-semibold">Duur van bezoek:</span>
-                <span style={{ marginLeft: '0.5rem' }}>{durationText}</span>
+                <span>{durationText}</span>
               </div>
 
               {visit.description && (
-                <div className="is-flex is-align-items-flex-start mt-4">
+                <div className="is-flex is-align-items-flex-start mt-4" style={{ gap: '0.5rem' }}>
                   <MessageSquare 
-                    size={16} 
+                    size={18} 
                     className="has-text-grey" 
-                    style={{ marginRight: '0.5rem', marginTop: '0.25rem' }} 
+                    style={{ marginRight: '0.75rem', marginTop: '0.25rem', flexShrink: 0 }} 
                   />
-                  <span className="has-text-weight-semibold">Opmerkingen:</span>
-                  <p style={{ marginLeft: '0.5rem' }}>{sanitizeText(visit.description)}</p>
+                  <div>
+                    <span className="has-text-weight-semibold">Opmerkingen:</span>
+                    <p style={{ marginTop: '0.5rem' }}>{sanitizeText(visit.description)}</p>
+                  </div>
                 </div>
               )}
             </div>
           </div>
 
           {isOwner && (
-            <div className="buttons has-addons" style={{ marginLeft: '1rem' }}>
+            <div 
+              className="buttons has-addons visit-card-buttons" 
+              style={{ 
+                marginLeft: '1rem',
+                flexShrink: 0
+              }}
+            >
               <button
                 type="button"
                 className="button is-small is-light"
@@ -104,6 +112,7 @@ export default function VisitCard({
                 aria-label={`Edit visit by ${visit.visitorName}`}
                 title="Edit visit"
                 disabled={isDeleting}
+                style={{ minWidth: '2.5rem' }}
               >
                 <Edit2 size={16} />
               </button>
@@ -114,6 +123,7 @@ export default function VisitCard({
                 aria-label={`Delete visit by ${visit.visitorName}`}
                 title="Delete visit"
                 disabled={isDeleting}
+                style={{ minWidth: '2.5rem' }}
               >
                 <Trash2 size={16} />
               </button>

@@ -12,6 +12,7 @@ interface BookingModalProps {
 	onClose: () => void;
 	initialDate?: string;
 	editingVisit?: Visit | null;
+	onVisitCreated?: (date: string) => void;
 }
 
 export default function BookingModal({
@@ -19,6 +20,7 @@ export default function BookingModal({
 	onClose,
 	initialDate,
 	editingVisit,
+	onVisitCreated,
 }: BookingModalProps) {
 	const userId = useCurrentUserId();
 	const { visits } = useVisits();
@@ -129,6 +131,10 @@ export default function BookingModal({
 				await updateDoc(doc(collectionRef, editingVisit.id), visitData);
 			} else {
 				await addDoc(collectionRef, visitData);
+				// Call callback with the date when a new visit is created
+				if (onVisitCreated) {
+					onVisitCreated(date);
+				}
 			}
 
 			onClose();

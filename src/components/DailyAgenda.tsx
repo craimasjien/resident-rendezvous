@@ -1,5 +1,6 @@
 import { useState, useMemo } from 'react'
 import { deleteDoc, doc } from 'firebase/firestore'
+import { useNavigate } from '@tanstack/react-router'
 
 import { getVisitsCollection } from '@/firebase/visitsCollection'
 import { useVisits } from '@/hooks/useVisits'
@@ -20,6 +21,7 @@ const dayFormatter = new Intl.DateTimeFormat('nl', {
 })
 
 export default function DailyAgenda({ selectedDate }: DailyAgendaProps) {
+  const navigate = useNavigate()
   const { visits, isLoading, error } = useVisits()
   const currentUserId = useCurrentUserId()
   const [isModalOpen, setIsModalOpen] = useState(false)
@@ -76,12 +78,17 @@ export default function DailyAgenda({ selectedDate }: DailyAgendaProps) {
     setEditingVisit(null)
   }
 
+  const handleVisitCreated = (date: string) => {
+    // Navigate to index page with the date parameter
+    navigate({ to: '/', search: { date }, replace: true })
+  }
+
   return (
     <>
       <div className="daily-agenda">
         <header className="mb-5">
-          <p className="title is-4">Geplande bezoeken op {formattedDate}</p>
-          <p className="subtitle is-6">
+          <p className="title is-4 mb-3">Geplande bezoeken op {formattedDate}</p>
+          <p className="subtitle is-6 mb-4">
             {isLoading
               ? 'Bezoeken laden...'
               : error
@@ -139,6 +146,7 @@ export default function DailyAgenda({ selectedDate }: DailyAgendaProps) {
         onClose={handleCloseModal}
         initialDate={selectedDate}
         editingVisit={editingVisit}
+        onVisitCreated={handleVisitCreated}
       />
     </>
   )
