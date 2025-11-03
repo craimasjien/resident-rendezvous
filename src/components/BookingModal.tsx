@@ -1,5 +1,6 @@
 import { addDoc, doc, updateDoc } from "firebase/firestore";
 import { useEffect, useState } from "react";
+import { createPortal } from "react-dom";
 
 import { getVisitsCollection } from "@/firebase/visitsCollection";
 import { useCurrentUserId } from "@/hooks/useCurrentUserId";
@@ -154,7 +155,7 @@ export default function BookingModal({
 
 	const conflict = checkConflict();
 
-	return (
+	const modalContent = (
 		<div className="modal is-active">
 			<div
 				className="modal-background"
@@ -296,4 +297,7 @@ export default function BookingModal({
 			</div>
 		</div>
 	);
+
+	// Render modal at document root level using portal to ensure it spans the full page
+	return createPortal(modalContent, document.body);
 }
