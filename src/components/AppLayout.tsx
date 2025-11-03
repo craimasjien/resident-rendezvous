@@ -61,7 +61,7 @@ export default function AppLayout({ children }: PropsWithChildren) {
               </span>
             </p>
           ) : (
-            <p className="subtitle is-6 has-text-grey">Connecting…</p>
+            <p className="subtitle is-6 has-text-grey">Verbinden...</p>
           )}
         </div>
       </footer>

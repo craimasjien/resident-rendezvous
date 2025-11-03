@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import { onSnapshot } from "firebase/firestore";
+import { onSnapshot, query, where } from "firebase/firestore";
 
 import { getVisitsCollection } from "@/firebase/visitsCollection";
 import { useCurrentUserId } from "@/hooks/useCurrentUserId";
@@ -32,9 +32,17 @@ export function useVisits(): UseVisitsResult {
 		}
 
 		const collectionRef = getVisitsCollection();
+		
+		// Filter to only fetch visits from today onwards to optimize network traffic
+		// Date is stored as "yyyy-MM-dd" string, so we can compare directly
+		const today = new Date().toISOString().slice(0, 10);
+		const visitsQuery = query(
+			collectionRef,
+			where("date", ">=", today)
+		);
 
 		const unsubscribe = onSnapshot(
-			collectionRef,
+			visitsQuery,
 			(snapshot) => {
 				const visitsList: Visit[] = [];
 				snapshot.forEach((doc) => {

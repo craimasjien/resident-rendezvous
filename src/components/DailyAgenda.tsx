@@ -1,14 +1,13 @@
 import { useState, useMemo } from 'react'
 import { deleteDoc, doc } from 'firebase/firestore'
-import { Edit2, Trash2 } from 'lucide-react'
 
 import { getVisitsCollection } from '@/firebase/visitsCollection'
 import { useVisits } from '@/hooks/useVisits'
 import { useCurrentUserId } from '@/hooks/useCurrentUserId'
 import type { Visit } from '@/types/visit'
-import { sanitizeText } from '@/utils/sanitize'
 
 import BookingModal from './BookingModal'
+import VisitCard from './VisitCard'
 
 interface DailyAgendaProps {
   selectedDate: string
@@ -19,21 +18,6 @@ const dayFormatter = new Intl.DateTimeFormat('nl', {
   month: 'long',
   day: 'numeric',
 })
-
-const summarizeDuration = (minutes: number) => {
-  if (minutes < 60) {
-    return `${minutes} minute${minutes === 1 ? '' : 's'}`
-  }
-
-  const hours = Math.floor(minutes / 60)
-  const remainingMinutes = minutes % 60
-
-  if (remainingMinutes === 0) {
-    return `${hours} hour${hours === 1 ? '' : 's'}`
-  }
-
-  return `${hours} hr ${remainingMinutes} min`
-}
 
 export default function DailyAgenda({ selectedDate }: DailyAgendaProps) {
   const { visits, isLoading, error } = useVisits()
@@ -102,7 +86,7 @@ export default function DailyAgenda({ selectedDate }: DailyAgendaProps) {
               ? 'Bezoeken laden...'
               : error
                 ? 'Het laden van de bezoeken is mislukt. Probeer het later nog eens.'
-                : '' }
+                : 'De volgende bezoeken zijn gepland:' }
           </p>
         </header>
 
@@ -119,50 +103,14 @@ export default function DailyAgenda({ selectedDate }: DailyAgendaProps) {
                 {dailyVisits.map(visit => {
                   const isOwner = currentUserId !== null && visit.userId === currentUserId
                   return (
-                    <article
+                    <VisitCard
                       key={visit.id}
-                      className={`card mb-4 ${isOwner ? 'is-success is-light' : ''}`}
-                    >
-                      <div className="card-content">
-                        <div className="is-flex is-justify-content-space-between is-align-items-flex-start">
-                          <div className="is-flex-grow-1">
-                            <p className="title is-5 mb-2">
-                              {visit.time} — {visit.visitorName}
-                            </p>
-                            <p className="subtitle is-6 mb-3">
-                              {summarizeDuration(visit.durationMinutes)}
-                            </p>
-                            {visit.description ? (
-                              <p>{sanitizeText(visit.description)}</p>
-                            ) : null}
-                          </div>
-                          {isOwner && (
-                            <div className="buttons has-addons">
-                              <button
-                                type="button"
-                                className="button is-small is-light"
-                                onClick={() => handleEditVisit(visit)}
-                                aria-label={`Edit visit by ${visit.visitorName}`}
-                                title="Edit visit"
-                                disabled={deletingVisitId === visit.id}
-                              >
-                                <Edit2 size={16} />
-                              </button>
-                              <button
-                                type="button"
-                                className="button is-small is-light is-danger"
-                                onClick={() => handleDeleteVisit(visit)}
-                                aria-label={`Delete visit by ${visit.visitorName}`}
-                                title="Delete visit"
-                                disabled={deletingVisitId === visit.id}
-                              >
-                                <Trash2 size={16} />
-                              </button>
-                            </div>
-                          )}
-                        </div>
-                      </div>
-                    </article>
+                      visit={visit}
+                      isOwner={isOwner}
+                      isDeleting={deletingVisitId === visit.id}
+                      onEdit={handleEditVisit}
+                      onDelete={handleDeleteVisit}
+                    />
                   )
                 })}
               </div>
