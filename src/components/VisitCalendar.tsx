@@ -20,18 +20,11 @@ type BulmaCalendarInstance = {
 	destroy: () => void;
 };
 
-const normalizeSelectedValue = (value: string | string[]) => {
-	if (Array.isArray(value)) {
-		return (
-			value.find((entry) => typeof entry === "string" && entry.length > 0) ??
-			null
-		);
-	}
-
-	return typeof value === "string" && value.length > 0 ? value : null;
+const getSelectedValue = (value: string | string[]): string | null => {
+	const str = Array.isArray(value) ? value.find((v) => typeof v === "string" && v) : value;
+	return typeof str === "string" && str ? str : null;
 };
 
-// Wait for bulmaCalendar to be available
 const waitForBulmaCalendar = (): Promise<typeof bulmaCalendar> => {
 	return new Promise((resolve, reject) => {
 		if (typeof bulmaCalendar !== "undefined") {
@@ -39,17 +32,6 @@ const waitForBulmaCalendar = (): Promise<typeof bulmaCalendar> => {
 			return;
 		}
 
-		// Check if script is already in the DOM
-		const script = document.querySelector(
-			'script[src*="bulma-calendar"]',
-		) as HTMLScriptElement;
-
-		if (!script) {
-			reject(new Error("Bulma Calendar script not found in DOM"));
-			return;
-		}
-
-		// Wait for script to load
 		const checkInterval = setInterval(() => {
 			if (typeof bulmaCalendar !== "undefined") {
 				clearInterval(checkInterval);
@@ -57,10 +39,9 @@ const waitForBulmaCalendar = (): Promise<typeof bulmaCalendar> => {
 			}
 		}, 50);
 
-		// Timeout after 5 seconds
 		setTimeout(() => {
 			clearInterval(checkInterval);
-			reject(new Error("Bulma Calendar failed to load within timeout"));
+			reject(new Error("Bulma Calendar failed to load"));
 		}, 5000);
 	});
 };
@@ -69,9 +50,9 @@ export default function VisitCalendar({
 	selectedDate,
 	onDateChange,
 }: VisitCalendarProps) {
-	const containerRef = useRef<HTMLDivElement | null>(null);
+	const containerRef = useRef<HTMLDivElement>(null);
 	const calendarRef = useRef<BulmaCalendarInstance | null>(null);
-	const initialSelectedDateRef = useRef(selectedDate);
+	const initialDateRef = useRef(selectedDate);
 	const onDateChangeRef = useRef(onDateChange);
 	const [isLoading, setIsLoading] = useState(true);
 	const [error, setError] = useState<string | null>(null);
@@ -86,29 +67,28 @@ export default function VisitCalendar({
 		const initializeCalendar = async () => {
 			try {
 				const calendarLib = await waitForBulmaCalendar();
-
-				if (!mounted || !containerRef.current || !calendarLib) {
-					return;
-				}
+				if (!mounted || !containerRef.current || !calendarLib) return;
 
 				const attachments = calendarLib.attach(containerRef.current, {
 					type: "date",
 					displayMode: "inline",
 					color: "primary",
 					dateFormat: "yyyy-MM-dd",
-					startDate: initialSelectedDateRef.current,
+					startDate: initialDateRef.current,
 					showFooter: false,
-					headerPosition: "left",
+					showHeader: false,
+					weekStart: 1,
+					highlightedDates: ['2025-11-05'],
+					minDate: (() => {
+						const today = new Date();
+						today.setHours(0, 0, 0, 0);
+						return today;
+					})(),
 				}) as BulmaCalendarInstance[] | BulmaCalendarInstance | null;
 
-				if (!mounted) {
-					return;
-				}
+				if (!mounted) return;
 
-				const calendarInstance = Array.isArray(attachments)
-					? attachments[0]
-					: (attachments ?? null);
-
+				const calendarInstance = Array.isArray(attachments) ? attachments[0] : attachments;
 				if (!calendarInstance) {
 					setError("Failed to initialize calendar");
 					setIsLoading(false);
@@ -116,27 +96,17 @@ export default function VisitCalendar({
 				}
 
 				calendarRef.current = calendarInstance;
-
-				try {
-					calendarInstance.value(initialSelectedDateRef.current);
-				} catch (err) {
-					console.warn("Unable to set initial calendar value", err);
-				}
-
+				calendarInstance.value(initialDateRef.current);
 				calendarInstance.on("select", (datepicker) => {
-					const selection = normalizeSelectedValue(datepicker.data.value());
-					if (selection) {
-						onDateChangeRef.current(selection);
-					}
+					const selection = getSelectedValue(datepicker.data.value());
+					if (selection) onDateChangeRef.current(selection);
 				});
 
 				setIsLoading(false);
 				setError(null);
 			} catch (err) {
 				if (mounted) {
-					setError(
-						err instanceof Error ? err.message : "Failed to load calendar",
-					);
+					setError(err instanceof Error ? err.message : "Failed to load calendar");
 					setIsLoading(false);
 				}
 			}
@@ -146,28 +116,14 @@ export default function VisitCalendar({
 
 		return () => {
 			mounted = false;
-			const calendarInstance = calendarRef.current;
-			if (calendarInstance) {
-				try {
-					calendarInstance.destroy();
-				} catch (err) {
-					console.warn("Error destroying calendar", err);
-				}
-				calendarRef.current = null;
-			}
+			calendarRef.current?.destroy();
+			calendarRef.current = null;
 		};
 	}, []);
 
 	useEffect(() => {
-		const calendarInstance = calendarRef.current;
-		if (!calendarInstance) {
-			return;
-		}
-
-		try {
-			calendarInstance.value(selectedDate);
-		} catch (error) {
-			console.warn("Unable to sync calendar value", error);
+		if (calendarRef.current) {
+			calendarRef.current.value(selectedDate);
 		}
 	}, [selectedDate]);
 
