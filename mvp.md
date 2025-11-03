@@ -87,10 +87,7 @@ Deliver a simple, friendly web app that lets the family coordinate visits with G
 ### Phase 5 - Polish, Security, and Launch Readiness
 
 - Verify layout on narrow screens; stack calendar above agenda when the viewport is < 1024px.
-- Display the anonymous `userId` prominently (header or footer) for coordination across family members.
-- Harden Firestore security rules: allow reads for all authenticated (even anonymous) users, restrict writes to the authenticated user's own documents.
-- Add basic analytics or logging (console metrics) to track conflict prevention and booking success.
-- Document deployment steps (e.g., Vercel or Firebase Hosting) and environment variable requirements.
+- Display the anonymous `userId` prominently (in a footer) for coordination across family members.
 
 ## Collaboration and Operations Recommendations
 

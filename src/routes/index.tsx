@@ -25,10 +25,10 @@ function HomeRoute() {
 			</section>
 
 			<div className="columns is-variable is-5 is-multiline">
-				<div className="column is-one-third is-full-mobile">
+				<div className="column is-one-third-desktop is-full-tablet is-full-mobile">
 					<VisitCalendar selectedDate={selectedDate} onDateChange={setSelectedDate} />
 				</div>
-				<div className="column is-two-thirds is-full-mobile">
+				<div className="column is-two-thirds-desktop is-full-tablet is-full-mobile">
 					<DailyAgenda selectedDate={selectedDate} />
 				</div>
 			</div>

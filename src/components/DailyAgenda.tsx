@@ -6,6 +6,7 @@ import { getVisitsCollection } from '@/firebase/visitsCollection'
 import { useVisits } from '@/hooks/useVisits'
 import { useCurrentUserId } from '@/hooks/useCurrentUserId'
 import type { Visit } from '@/types/visit'
+import { sanitizeText } from '@/utils/sanitize'
 
 import BookingModal from './BookingModal'
 
@@ -131,7 +132,9 @@ export default function DailyAgenda({ selectedDate }: DailyAgendaProps) {
                             <p className="subtitle is-6 mb-3">
                               {summarizeDuration(visit.durationMinutes)}
                             </p>
-                            {visit.description ? <p>{visit.description}</p> : null}
+                            {visit.description ? (
+                              <p>{sanitizeText(visit.description)}</p>
+                            ) : null}
                           </div>
                           {isOwner && (
                             <div className="buttons has-addons">

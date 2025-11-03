@@ -1,10 +1,13 @@
 import { useEffect, useState, type PropsWithChildren } from 'react'
 
 import { initAnonymousAuth, observeAuth } from '../firebaseClient'
+import { useOfflineStatus } from '../hooks/useOfflineStatus'
+import OfflineToast from './OfflineToast'
 
 export default function AppLayout({ children }: PropsWithChildren) {
   const [authError, setAuthError] = useState<string | null>(null)
   const [userId, setUserId] = useState<string | null>(null)
+  const isOnline = useOfflineStatus()
 
   useEffect(() => {
     let unsubscribe: (() => void) | undefined
@@ -32,13 +35,6 @@ export default function AppLayout({ children }: PropsWithChildren) {
           <div className="container has-text-centered">
             <p className="title">Resident Rendezvous</p>
             <p className="subtitle">Plan loving visits together, without the hassle.</p>
-            {userId ? (
-              <span className="tag is-light is-medium mt-3">
-                Your visitor ID: <strong className="ml-2">{userId}</strong>
-              </span>
-            ) : (
-              <span className="tag is-light is-medium mt-3">Connecting…</span>
-            )}
           </div>
         </div>
       </section>
@@ -55,6 +51,24 @@ export default function AppLayout({ children }: PropsWithChildren) {
           <div className="box">{children}</div>
         </div>
       </section>
+
+      <footer className="footer">
+        <div className="content has-text-centered">
+          {userId ? (
+            <p className="subtitle is-6">
+              Your Visitor ID: <strong className="has-text-primary">{userId}</strong>
+              <br />
+              <span className="is-size-7 has-text-grey mt-2">
+                Share this ID with family members to coordinate visits together
+              </span>
+            </p>
+          ) : (
+            <p className="subtitle is-6 has-text-grey">Connecting…</p>
+          )}
+        </div>
+      </footer>
+
+      <OfflineToast isOffline={!isOnline} />
     </div>
   )
 }

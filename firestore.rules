@@ -1,0 +1,59 @@
+rules_version = '2';
+
+service cloud.firestore {
+  match /databases/{database}/documents {
+    // Helper function to check if user is authenticated
+    function isAuthenticated() {
+      return request.auth != null;
+    }
+    
+    // Helper function to check if user owns a document
+    function isOwner(userId) {
+      return isAuthenticated() && request.auth.uid == userId;
+    }
+    
+    // Helper function to get the app ID from the document path
+    // Path format: artifacts/{appId}/public/data/visits/{visitId}
+    function getAppId() {
+      return path.split('/')[1];
+    }
+    
+    // Visits collection
+    // Path: artifacts/{appId}/public/data/visits/{visitId}
+    match /artifacts/{appId}/public/data/visits/{visitId} {
+      // Allow read access to all authenticated users
+      allow read: if isAuthenticated();
+      
+      // Allow create if user is authenticated and sets their own userId
+      allow create: if isAuthenticated() 
+                    && request.resource.data.userId == request.auth.uid
+                    && request.resource.data.keys().hasAll(['date', 'time', 'visitorName', 'durationMinutes', 'userId'])
+                    && request.resource.data.date is string
+                    && request.resource.data.time is string
+                    && request.resource.data.visitorName is string
+                    && request.resource.data.durationMinutes is int
+                    && request.resource.data.userId is string
+                    && (!('description' in request.resource.data) || request.resource.data.description is string);
+      
+      // Allow update only if user owns the document
+      allow update: if isOwner(resource.data.userId)
+                    && request.resource.data.userId == resource.data.userId // Prevent userId changes
+                    && request.resource.data.keys().hasAll(['date', 'time', 'visitorName', 'durationMinutes', 'userId'])
+                    && request.resource.data.date is string
+                    && request.resource.data.time is string
+                    && request.resource.data.visitorName is string
+                    && request.resource.data.durationMinutes is int
+                    && request.resource.data.userId is string
+                    && (!('description' in request.resource.data) || request.resource.data.description is string);
+      
+      // Allow delete only if user owns the document
+      allow delete: if isOwner(resource.data.userId);
+    }
+    
+    // Deny all other access
+    match /{document=**} {
+      allow read, write: if false;
+    }
+  }
+}
+

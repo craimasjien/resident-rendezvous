@@ -2,6 +2,7 @@ import { useEffect, useState } from "react";
 import { onSnapshot } from "firebase/firestore";
 
 import { getVisitsCollection } from "@/firebase/visitsCollection";
+import { useCurrentUserId } from "@/hooks/useCurrentUserId";
 import type { Visit } from "@/types/visit";
 
 interface UseVisitsResult {
@@ -13,13 +14,23 @@ interface UseVisitsResult {
 /**
  * Hook that subscribes to Firestore visits collection with real-time updates.
  * Maps documents to Visit objects using the converter and manages loading/error states.
+ * Only sets up the listener after authentication is complete.
  */
 export function useVisits(): UseVisitsResult {
+	const userId = useCurrentUserId();
 	const [visits, setVisits] = useState<Visit[]>([]);
 	const [isLoading, setIsLoading] = useState(true);
 	const [error, setError] = useState<Error | null>(null);
 
 	useEffect(() => {
+		// Don't set up the listener until authentication is complete
+		if (userId === null) {
+			// Authentication is still in progress
+			setIsLoading(true);
+			setError(null);
+			return;
+		}
+
 		const collectionRef = getVisitsCollection();
 
 		const unsubscribe = onSnapshot(
@@ -53,7 +64,7 @@ export function useVisits(): UseVisitsResult {
 		return () => {
 			unsubscribe();
 		};
-	}, []);
+	}, [userId]);
 
 	return { visits, isLoading, error };
 }

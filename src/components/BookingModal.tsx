@@ -5,6 +5,7 @@ import { getVisitsCollection } from "@/firebase/visitsCollection";
 import { useCurrentUserId } from "@/hooks/useCurrentUserId";
 import { useVisits } from "@/hooks/useVisits";
 import type { Visit, VisitWriteData } from "@/types/visit";
+import { sanitizeText } from "@/utils/sanitize";
 
 interface BookingModalProps {
 	isOpen: boolean;
@@ -54,6 +55,7 @@ export default function BookingModal({
 	const [errors, setErrors] = useState<FormErrors>({});
 	const [submitError, setSubmitError] = useState<string | null>(null);
 	const [conflictWarning, setConflictWarning] = useState<string | null>(null);
+	const [conflictConfirmed, setConflictConfirmed] = useState(false);
 
 	const isEditing = editingVisit !== null && editingVisit !== undefined;
 
@@ -149,6 +151,7 @@ export default function BookingModal({
 			setErrors({});
 			setSubmitError(null);
 			setConflictWarning(null);
+			setConflictConfirmed(false);
 		}
 	}, [isOpen, initialDate, editingVisit]);
 
@@ -157,8 +160,13 @@ export default function BookingModal({
 		if (isOpen && date && time && durationMinutes) {
 			const conflict = detectConflicts();
 			setConflictWarning(conflict);
+			// Reset confirmation when conflict status changes
+			if (conflict) {
+				setConflictConfirmed(false);
+			}
 		} else {
 			setConflictWarning(null);
+			setConflictConfirmed(false);
 		}
 	}, [isOpen, date, time, durationMinutes, detectConflicts]);
 
@@ -207,9 +215,10 @@ export default function BookingModal({
 		const conflict = detectConflicts();
 		if (conflict) {
 			setConflictWarning(conflict);
-			// Still allow saving but warn the user
-			// For blocking, uncomment the return below
-			// return;
+			// Block duplicates unless user has explicitly confirmed
+			if (!conflictConfirmed) {
+				return;
+			}
 		}
 
 		setIsSubmitting(true);
@@ -221,7 +230,7 @@ export default function BookingModal({
 				time,
 				visitorName: visitorName.trim(),
 				durationMinutes,
-				description: description.trim() || "",
+				description: description.trim() ? sanitizeText(description.trim()) : "",
 				userId,
 			};
 
@@ -310,6 +319,19 @@ export default function BookingModal({
 						{conflictWarning && (
 							<div className="notification is-warning mb-4" role="alert">
 								<strong>Conflict Detected:</strong> {conflictWarning}
+								<div className="field mt-4">
+									<label className="checkbox">
+										<input
+											type="checkbox"
+											checked={conflictConfirmed}
+											onChange={(e) => setConflictConfirmed(e.target.checked)}
+											disabled={isSubmitting}
+										/>
+										<span className="ml-2">
+											I understand there is a conflict and want to proceed anyway
+										</span>
+									</label>
+								</div>
 							</div>
 						)}
 
@@ -415,7 +437,12 @@ export default function BookingModal({
 						<button
 							type="submit"
 							className={`button is-primary ${isSubmitting ? "is-loading" : ""}`}
-							disabled={isSubmitting}
+							disabled={isSubmitting || (conflictWarning !== null && !conflictConfirmed)}
+							title={
+								conflictWarning && !conflictConfirmed
+									? "Please confirm the conflict to proceed"
+									: undefined
+							}
 						>
 							{isEditing ? "Update Visit" : "Schedule Visit"}
 						</button>
