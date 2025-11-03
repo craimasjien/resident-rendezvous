@@ -1,5 +1,5 @@
 import { addDoc, doc, updateDoc } from "firebase/firestore";
-import { useCallback, useEffect, useRef, useState } from "react";
+import { useEffect, useState } from "react";
 
 import { getVisitsCollection } from "@/firebase/visitsCollection";
 import { useCurrentUserId } from "@/hooks/useCurrentUserId";
@@ -14,30 +14,6 @@ interface BookingModalProps {
 	editingVisit?: Visit | null;
 }
 
-interface FormErrors {
-	visitorName?: string;
-	date?: string;
-	time?: string;
-	durationMinutes?: string;
-}
-
-const validateTime = (time: string): boolean => {
-	// HH:mm format validation
-	const timeRegex = /^([01][0-9]|2[0-3]):[0-5][0-9]$/;
-	return timeRegex.test(time);
-};
-
-const validateDate = (date: string): boolean => {
-	// yyyy-MM-dd format validation
-	const dateRegex = /^\d{4}-\d{2}-\d{2}$/;
-	if (!dateRegex.test(date)) {
-		return false;
-	}
-
-	const parsedDate = new Date(`${date}T00:00:00`);
-	return !Number.isNaN(parsedDate.getTime());
-};
-
 export default function BookingModal({
 	isOpen,
 	onClose,
@@ -47,182 +23,97 @@ export default function BookingModal({
 	const userId = useCurrentUserId();
 	const { visits } = useVisits();
 	const [visitorName, setVisitorName] = useState("");
-	const [date, setDate] = useState(initialDate || "");
+	const [date, setDate] = useState("");
 	const [time, setTime] = useState("");
 	const [durationMinutes, setDurationMinutes] = useState(60);
 	const [description, setDescription] = useState("");
 	const [isSubmitting, setIsSubmitting] = useState(false);
-	const [errors, setErrors] = useState<FormErrors>({});
-	const [submitError, setSubmitError] = useState<string | null>(null);
-	const [conflictError, setConflictError] = useState<string | null>(null);
-	const isSubmittingRef = useRef(false);
+	const [error, setError] = useState<string | null>(null);
 
-	const isEditing = editingVisit !== null && editingVisit !== undefined;
+	const isEditing = !!editingVisit;
 
-	const checkTimeOverlap = useCallback(
-		(
-			start1: string,
-			duration1: number,
-			start2: string,
-			duration2: number,
-		): boolean => {
-			const parseTime = (timeStr: string): number => {
-				const [hours, minutes] = timeStr.split(":").map(Number);
-				return hours * 60 + minutes;
-			};
+	// Reset form when modal opens
+	useEffect(() => {
+		if (!isOpen) return;
 
-			const startMinutes1 = parseTime(start1);
-			const endMinutes1 = startMinutes1 + duration1;
-			const startMinutes2 = parseTime(start2);
-			const endMinutes2 = startMinutes2 + duration2;
-
-			// Check if time ranges overlap
-			return startMinutes1 < endMinutes2 && startMinutes2 < endMinutes1;
-		},
-		[],
-	);
-
-	const detectConflicts = useCallback((): string | null => {
-		if (!date || !time || !durationMinutes) {
-			return null;
+		if (editingVisit) {
+			setVisitorName(editingVisit.visitorName);
+			setDate(editingVisit.date);
+			setTime(editingVisit.time);
+			setDurationMinutes(editingVisit.durationMinutes);
+			setDescription(editingVisit.description || "");
+		} else {
+			setVisitorName("");
+			setDate(initialDate || "");
+			setTime("");
+			setDurationMinutes(60);
+			setDescription("");
 		}
+		setError(null);
+	}, [isOpen, initialDate, editingVisit]);
+
+	const checkConflict = (): string | null => {
+		if (!date || !time || !durationMinutes) return null;
 
 		const conflictingVisits = visits.filter((visit) => {
-			// Skip the visit being edited if we're in edit mode
-			if (isEditing && visit.id === editingVisit?.id) {
-				return false;
-			}
+			if (isEditing && visit.id === editingVisit?.id) return false;
+			if (visit.date !== date) return false;
 
-			// Check if on the same date
-			const visitDateISO = new Date(`${visit.date}T00:00:00`)
-				.toISOString()
-				.slice(0, 10);
-			const newDateISO = new Date(`${date}T00:00:00`)
-				.toISOString()
-				.slice(0, 10);
+			const parseTime = (t: string) => {
+				const [h, m] = t.split(":").map(Number);
+				return h * 60 + m;
+			};
 
-			if (visitDateISO !== newDateISO) {
-				return false;
-			}
+			const start1 = parseTime(time);
+			const end1 = start1 + durationMinutes;
+			const start2 = parseTime(visit.time);
+			const end2 = start2 + visit.durationMinutes;
 
-			// Check for time overlap
-			return checkTimeOverlap(
-				time,
-				durationMinutes,
-				visit.time,
-				visit.durationMinutes,
-			);
+			return start1 < end2 && start2 < end1;
 		});
 
 		if (conflictingVisits.length > 0) {
 			const names = conflictingVisits.map((v) => v.visitorName).join(", ");
-			return `Dit bezoek overlapt met bestaande bezoeken van ${names}.`;
+			return `Dit bezoek overlapt met een bestaand bezoek van ${names}. Kies een andere tijd of datum om conflicten te vermijden.`;
 		}
 
 		return null;
-	}, [
-		date,
-		time,
-		durationMinutes,
-		visits,
-		isEditing,
-		editingVisit?.id,
-		checkTimeOverlap,
-	]);
-
-	// Reset form when modal opens/closes, initialDate changes, or editingVisit changes
-	useEffect(() => {
-		if (isOpen) {
-			if (editingVisit) {
-				// Pre-fill form for editing
-				setVisitorName(editingVisit.visitorName);
-				setDate(editingVisit.date);
-				setTime(editingVisit.time);
-				setDurationMinutes(editingVisit.durationMinutes);
-				setDescription(editingVisit.description || "");
-			} else {
-				// Reset form for new visit
-				setVisitorName("");
-				setDate(initialDate || "");
-				setTime("");
-				setDurationMinutes(60);
-				setDescription("");
-			}
-			setErrors({});
-			setSubmitError(null);
-			setConflictError(null);
-			isSubmittingRef.current = false;
-		}
-	}, [isOpen, initialDate, editingVisit]);
-
-	// Check for conflicts when date, time, or duration changes
-	// Skip updating conflict error during submission to prevent flash
-	useEffect(() => {
-		if (isSubmitting || isSubmittingRef.current) {
-			return;
-		}
-		if (isOpen && date && time && durationMinutes) {
-			const conflict = detectConflicts();
-			setConflictError(conflict);
-		} else {
-			setConflictError(null);
-		}
-	}, [isOpen, date, time, durationMinutes, detectConflicts, isSubmitting]);
-
-	const validateForm = (): boolean => {
-		const newErrors: FormErrors = {};
-
-		if (!visitorName.trim()) {
-			newErrors.visitorName = "Bezoekersnaam is verplicht";
-		}
-
-		if (!date) {
-			newErrors.date = "Datum is verplicht";
-		} else if (!validateDate(date)) {
-			newErrors.date = "Voer een geldige datum in (jjjj-MM-dd)";
-		}
-
-		if (!time) {
-			newErrors.time = "Tijd is verplicht";
-		} else if (!validateTime(time)) {
-			newErrors.time = "Voer een geldige tijd in (UU:mm)";
-		}
-
-		if (!durationMinutes || durationMinutes < 15) {
-			newErrors.durationMinutes = "Duur moet minimaal 15 minuten zijn";
-		}
-
-		setErrors(newErrors);
-		return Object.keys(newErrors).length === 0;
 	};
+
+	// Show conflict error in real-time
+	useEffect(() => {
+		if (isSubmitting) return;
+		const conflict = checkConflict();
+		setError((prevError) => {
+			if (conflict) {
+				return conflict;
+			}
+			// Clear conflict errors but preserve other errors
+			if (prevError && prevError.includes("overlapt")) {
+				return null;
+			}
+			return prevError;
+		});
+	}, [date, time, durationMinutes, visits, isEditing, editingVisit?.id, isSubmitting]);
 
 	const handleSubmit = async (e: React.FormEvent) => {
 		e.preventDefault();
-		setSubmitError(null);
-
-		if (!validateForm()) {
-			return;
-		}
+		setError(null);
 
 		if (!userId) {
-			setSubmitError("Je moet ingelogd zijn om een bezoek te plannen");
+			setError("Je moet ingelogd zijn om een bezoek te plannen");
 			return;
 		}
 
-		// Check for conflicts - prevent submission if conflict exists
-		const conflict = detectConflicts();
+		const conflict = checkConflict();
 		if (conflict) {
-			setConflictError(conflict);
+			setError(conflict);
 			return;
 		}
 
-		// Set ref first to prevent useEffect from running, then clear error
-		isSubmittingRef.current = true;
-		setConflictError(null);
 		setIsSubmitting(true);
 
 		try {
-			// Convert to canonical Visit format
 			const visitData: VisitWriteData = {
 				date,
 				time,
@@ -235,61 +126,34 @@ export default function BookingModal({
 			const collectionRef = getVisitsCollection();
 
 			if (isEditing && editingVisit) {
-				// Update existing visit
-				const visitDocRef = doc(collectionRef, editingVisit.id);
-				await updateDoc(visitDocRef, visitData);
+				await updateDoc(doc(collectionRef, editingVisit.id), visitData);
 			} else {
-				// Create new visit
 				await addDoc(collectionRef, visitData);
 			}
 
-			// Success - close modal and reset form
-			// The Firestore listener will automatically refresh the visits list
 			onClose();
-		} catch (error) {
-			console.error(
-				`Error ${isEditing ? "updating" : "creating"} visit`,
-				error,
-			);
-			setSubmitError(
-				error instanceof Error
-					? error.message
-					: `Bezoek ${isEditing ? "bijwerken" : "aanmaken"} mislukt. Probeer het opnieuw.`,
+		} catch (err) {
+			console.error(`Error ${isEditing ? "updating" : "creating"} visit`, err);
+			setError(
+				err instanceof Error
+					? err.message
+					: `Bezoek ${isEditing ? "bijwerken" : "aanmaken"} mislukt.`,
 			);
 		} finally {
 			setIsSubmitting(false);
-			isSubmittingRef.current = false;
 		}
 	};
 
-	const handleClose = () => {
-		if (!isSubmitting) {
-			onClose();
-		}
-	};
+	if (!isOpen) return null;
 
-	if (!isOpen) {
-		return null;
-	}
-
-	const handleBackgroundClick = (e: React.MouseEvent) => {
-		if (e.target === e.currentTarget) {
-			handleClose();
-		}
-	};
-
-	const handleBackgroundKeyDown = (e: React.KeyboardEvent) => {
-		if (e.key === "Escape") {
-			handleClose();
-		}
-	};
+	const conflict = checkConflict();
 
 	return (
 		<div className="modal is-active">
 			<div
 				className="modal-background"
-				onClick={handleBackgroundClick}
-				onKeyDown={handleBackgroundKeyDown}
+				onClick={(e) => e.target === e.currentTarget && !isSubmitting && onClose()}
+				onKeyDown={(e) => e.key === "Escape" && !isSubmitting && onClose()}
 				role="button"
 				tabIndex={-1}
 				aria-label="Sluit modal"
@@ -303,25 +167,15 @@ export default function BookingModal({
 						type="button"
 						className="delete"
 						aria-label="sluiten"
-						onClick={handleClose}
+						onClick={onClose}
 						disabled={isSubmitting}
 					/>
 				</header>
 				<form onSubmit={handleSubmit}>
 					<section className="modal-card-body">
-						{submitError && (
+						{error && (
 							<div className="notification is-danger mb-4" role="alert">
-								{submitError}
-							</div>
-						)}
-
-						{conflictError && (
-							<div className="notification is-danger mb-4" role="alert">
-								<strong>Conflict gedetecteerd:</strong> {conflictError}
-								<br />
-								<span className="is-size-7">
-									Kies een andere tijd of datum om conflicten te vermijden.
-								</span>
+								{error}
 							</div>
 						)}
 
@@ -332,7 +186,7 @@ export default function BookingModal({
 							<div className="control">
 								<input
 									id="visitor-name"
-									className={`input ${errors.visitorName ? "is-danger" : ""}`}
+									className="input"
 									type="text"
 									placeholder="Voer je naam in"
 									value={visitorName}
@@ -341,9 +195,6 @@ export default function BookingModal({
 									required
 								/>
 							</div>
-							{errors.visitorName && (
-								<p className="help is-danger">{errors.visitorName}</p>
-							)}
 						</div>
 
 						<div className="field">
@@ -353,7 +204,7 @@ export default function BookingModal({
 							<div className="control">
 								<input
 									id="visit-date"
-									className={`input ${errors.date ? "is-danger" : ""}`}
+									className="input"
 									type="date"
 									value={date}
 									onChange={(e) => setDate(e.target.value)}
@@ -361,7 +212,6 @@ export default function BookingModal({
 									required
 								/>
 							</div>
-							{errors.date && <p className="help is-danger">{errors.date}</p>}
 						</div>
 
 						<div className="field">
@@ -371,7 +221,7 @@ export default function BookingModal({
 							<div className="control">
 								<input
 									id="visit-time"
-									className={`input ${errors.time ? "is-danger" : ""}`}
+									className="input"
 									type="time"
 									value={time}
 									onChange={(e) => setTime(e.target.value)}
@@ -379,7 +229,6 @@ export default function BookingModal({
 									required
 								/>
 							</div>
-							{errors.time && <p className="help is-danger">{errors.time}</p>}
 						</div>
 
 						<div className="field">
@@ -389,7 +238,7 @@ export default function BookingModal({
 							<div className="control">
 								<input
 									id="duration"
-									className={`input ${errors.durationMinutes ? "is-danger" : ""}`}
+									className="input"
 									type="number"
 									min="15"
 									step="15"
@@ -401,9 +250,6 @@ export default function BookingModal({
 									required
 								/>
 							</div>
-							{errors.durationMinutes && (
-								<p className="help is-danger">{errors.durationMinutes}</p>
-							)}
 						</div>
 
 						<div className="field">
@@ -427,19 +273,14 @@ export default function BookingModal({
 						<button
 							type="submit"
 							className={`button is-primary ${isSubmitting ? "is-loading" : ""}`}
-							disabled={isSubmitting || conflictError !== null}
-							title={
-								conflictError
-									? "Los het conflict op voordat je het bezoek aanmaakt"
-									: undefined
-							}
+							disabled={isSubmitting || conflict !== null}
 						>
 							{isEditing ? "Bezoek bijwerken" : "Bezoek inplannen"}
 						</button>
 						<button
 							type="button"
 							className="button"
-							onClick={handleClose}
+							onClick={onClose}
 							disabled={isSubmitting}
 						>
 							Annuleren

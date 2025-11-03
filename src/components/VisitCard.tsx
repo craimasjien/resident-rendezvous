@@ -13,7 +13,7 @@ interface VisitCardProps {
 
 const summarizeDuration = (minutes: number) => {
   if (minutes < 60) {
-    return `${minutes} minute${minutes === 1 ? '' : 's'}`
+    return `${minutes} ${minutes === 1 ? 'minuut' : 'minuten'}`
   }
 
   const hours = Math.floor(minutes / 60)
@@ -88,7 +88,8 @@ export default function VisitCard({
                     className="has-text-grey" 
                     style={{ marginRight: '0.5rem', marginTop: '0.25rem' }} 
                   />
-                  <p className="mb-0">{sanitizeText(visit.description)}</p>
+                  <span className="has-text-weight-semibold">Opmerkingen:</span>
+                  <p style={{ marginLeft: '0.5rem' }}>{sanitizeText(visit.description)}</p>
                 </div>
               )}
             </div>
