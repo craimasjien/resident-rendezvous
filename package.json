@@ -14,11 +14,8 @@
     "deploy": "vite build && tsc && firebase deploy"
   },
   "dependencies": {
-    "@tanstack/react-devtools": "^0.7.0",
     "@tanstack/react-query": "^5.66.5",
-    "@tanstack/react-query-devtools": "^5.84.2",
     "@tanstack/react-router": "^1.132.0",
-    "@tanstack/react-router-devtools": "^1.132.0",
     "@tanstack/router-plugin": "^1.132.0",
     "firebase": "^12.5.0",
     "lucide-react": "^0.545.0",
@@ -29,6 +26,9 @@
     "@biomejs/biome": "2.2.4",
     "@testing-library/dom": "^10.4.0",
     "@testing-library/react": "^16.2.0",
+    "@tanstack/react-devtools": "^0.7.0",
+    "@tanstack/react-query-devtools": "^5.84.2",
+    "@tanstack/react-router-devtools": "^1.132.0",
     "@types/node": "^22.10.2",
     "@types/react": "^19.2.0",
     "@types/react-dom": "^19.2.0",
