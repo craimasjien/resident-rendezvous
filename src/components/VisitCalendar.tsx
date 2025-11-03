@@ -1,4 +1,4 @@
-import { useEffect, useRef } from "react";
+import { useEffect, useRef, useState } from "react";
 
 interface VisitCalendarProps {
 	selectedDate: string;
@@ -31,78 +31,134 @@ const normalizeSelectedValue = (value: string | string[]) => {
 	return typeof value === "string" && value.length > 0 ? value : null;
 };
 
+// Wait for bulmaCalendar to be available
+const waitForBulmaCalendar = (): Promise<typeof bulmaCalendar> => {
+	return new Promise((resolve, reject) => {
+		if (typeof bulmaCalendar !== "undefined") {
+			resolve(bulmaCalendar);
+			return;
+		}
+
+		// Check if script is already in the DOM
+		const script = document.querySelector(
+			'script[src*="bulma-calendar"]',
+		) as HTMLScriptElement;
+
+		if (!script) {
+			reject(new Error("Bulma Calendar script not found in DOM"));
+			return;
+		}
+
+		// Wait for script to load
+		const checkInterval = setInterval(() => {
+			if (typeof bulmaCalendar !== "undefined") {
+				clearInterval(checkInterval);
+				resolve(bulmaCalendar);
+			}
+		}, 50);
+
+		// Timeout after 5 seconds
+		setTimeout(() => {
+			clearInterval(checkInterval);
+			reject(new Error("Bulma Calendar failed to load within timeout"));
+		}, 5000);
+	});
+};
+
 export default function VisitCalendar({
 	selectedDate,
 	onDateChange,
 }: VisitCalendarProps) {
-	const inputRef = useRef<HTMLInputElement | null>(null);
+	const containerRef = useRef<HTMLDivElement | null>(null);
 	const calendarRef = useRef<BulmaCalendarInstance | null>(null);
 	const initialSelectedDateRef = useRef(selectedDate);
 	const onDateChangeRef = useRef(onDateChange);
+	const [isLoading, setIsLoading] = useState(true);
+	const [error, setError] = useState<string | null>(null);
 
 	useEffect(() => {
 		onDateChangeRef.current = onDateChange;
 	}, [onDateChange]);
 
 	useEffect(() => {
-		if (typeof bulmaCalendar === "undefined") {
-			console.warn(
-				"bulmaCalendar script is not available. Ensure the CDN script is loaded.",
-			);
-			return;
-		}
+		let mounted = true;
 
-		if (!inputRef.current) {
-			return;
-		}
+		const initializeCalendar = async () => {
+			try {
+				const calendarLib = await waitForBulmaCalendar();
 
-		const attachments = bulmaCalendar.attach(inputRef.current, {
-			type: "date",
-			displayMode: "inline",
-			color: "primary",
-			dateFormat: "yyyy-MM-dd",
-			startDate: initialSelectedDateRef.current,
-			showFooter: false,
-			headerPosition: "left",
-		}) as BulmaCalendarInstance[] | BulmaCalendarInstance | null;
+				if (!mounted || !containerRef.current || !calendarLib) {
+					return;
+				}
 
-		const calendarInstance = Array.isArray(attachments)
-			? attachments[0]
-			: (attachments ?? null);
+				const attachments = calendarLib.attach(containerRef.current, {
+					type: "date",
+					displayMode: "inline",
+					color: "primary",
+					dateFormat: "yyyy-MM-dd",
+					startDate: initialSelectedDateRef.current,
+					showFooter: false,
+					headerPosition: "left",
+				}) as BulmaCalendarInstance[] | BulmaCalendarInstance | null;
 
-		if (!calendarInstance) {
-			console.warn(
-				"bulmaCalendar failed to initialize for the provided element",
-			);
-			return;
-		}
+				if (!mounted) {
+					return;
+				}
 
-		calendarRef.current = calendarInstance;
+				const calendarInstance = Array.isArray(attachments)
+					? attachments[0]
+					: (attachments ?? null);
 
-		try {
-			calendarInstance.value(initialSelectedDateRef.current);
-		} catch (error) {
-			console.warn("Unable to set initial calendar value", error);
-		}
+				if (!calendarInstance) {
+					setError("Failed to initialize calendar");
+					setIsLoading(false);
+					return;
+				}
 
-		calendarInstance.on("select", (datepicker) => {
-			const selection = normalizeSelectedValue(datepicker.data.value());
-			if (selection) {
-				onDateChangeRef.current(selection);
+				calendarRef.current = calendarInstance;
+
+				try {
+					calendarInstance.value(initialSelectedDateRef.current);
+				} catch (err) {
+					console.warn("Unable to set initial calendar value", err);
+				}
+
+				calendarInstance.on("select", (datepicker) => {
+					const selection = normalizeSelectedValue(datepicker.data.value());
+					if (selection) {
+						onDateChangeRef.current(selection);
+					}
+				});
+
+				setIsLoading(false);
+				setError(null);
+			} catch (err) {
+				if (mounted) {
+					setError(
+						err instanceof Error ? err.message : "Failed to load calendar",
+					);
+					setIsLoading(false);
+				}
 			}
-		});
+		};
+
+		void initializeCalendar();
 
 		return () => {
-			calendarInstance.destroy();
-			calendarRef.current = null;
+			mounted = false;
+			const calendarInstance = calendarRef.current;
+			if (calendarInstance) {
+				try {
+					calendarInstance.destroy();
+				} catch (err) {
+					console.warn("Error destroying calendar", err);
+				}
+				calendarRef.current = null;
+			}
 		};
 	}, []);
 
 	useEffect(() => {
-		if (inputRef.current) {
-			inputRef.current.value = selectedDate;
-		}
-
 		const calendarInstance = calendarRef.current;
 		if (!calendarInstance) {
 			return;
@@ -123,14 +179,20 @@ export default function VisitCalendar({
 					The family agenda updates instantly as you browse.
 				</p>
 			</header>
-			<input
-				ref={inputRef}
-				type="date"
-				className="input"
-				aria-label="Select visit date"
-				defaultValue={selectedDate}
-				style={{ position: "absolute", opacity: 0, pointerEvents: "none" }}
-			/>
+			{error ? (
+				<div className="notification is-warning">
+					<strong>Calendar Error:</strong> {error}
+				</div>
+			) : (
+				<div>
+					{isLoading && (
+						<div className="has-text-centered py-4">
+							<span className="has-text-grey">Loading calendar...</span>
+						</div>
+					)}
+					<div ref={containerRef} className="calendar-container" />
+				</div>
+			)}
 		</div>
 	);
 }
