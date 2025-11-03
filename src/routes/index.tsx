@@ -64,13 +64,10 @@ function HomeRoute() {
 			<section className="content mb-6">
 				<h2 className="title is-4">Coördineer bezoeken</h2>
 				<p className="subtitle is-6">
-					Selecteer een dag op de agenda om te bekijken wie op bezoek komt en hoe laat. De geplande bezoeken worden aan de rechterkant van de pagina getoond.
+					Selecteer een dag op de agenda om te bekijken wie op bezoek komt en hoe laat, de geplande bezoeken worden dan getoond. Je kunt een bezoek plannen door op de knop onderin de pagina te klikken.
 				</p>
 				<p>
-					Je kunt een bezoek plannen door op de knop onderin de pagina te klikken.
-				</p>
-				<p>
-					Je kunt ook een bezoek wijzigen of verwijderen wat je zelf hebt gemaakt door op de bezoek te klikken en de knoppen onderin de pagina te klikken.
+					Je kunt ook een bezoek wijzigen of verwijderen die je zelf hebt gemaakt.
 				</p>
 			</section>
 
