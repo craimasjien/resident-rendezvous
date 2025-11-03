@@ -25,8 +25,8 @@ export default function OfflineToast({ isOffline }: OfflineToastProps) {
 
 	return (
 		<div
-			className={`notification has-shadow${
-				isOffline ? ' is-warning' : ' is-success'
+			className={`alert alert-dismissible has-shadow${
+				isOffline ? ' alert-warning' : ' alert-success'
 			}`}
 			style={{
 				position: 'fixed',
@@ -41,7 +41,7 @@ export default function OfflineToast({ isOffline }: OfflineToastProps) {
 		>
 			<button
 				type="button"
-				className="delete"
+				className="btn-close"
 				onClick={() => setIsVisible(false)}
 				aria-label="Close notification"
 			/>

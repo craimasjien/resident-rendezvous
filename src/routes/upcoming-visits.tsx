@@ -68,16 +68,15 @@ function UpcomingVisitsRoute() {
 	return (
 		<>
 			<div className="upcoming-visits-route">
-				<section className="content mb-6" style={{ 
+				<section className="content mb-5" style={{ 
 					padding: '2rem',
 					background: 'linear-gradient(135deg, rgba(99, 102, 241, 0.05) 0%, rgba(139, 92, 246, 0.05) 100%)',
 					borderRadius: 'var(--radius-xl)',
 					border: '1px solid var(--gray-200)'
 				}}>
-					<h2 className="title is-4" style={{ marginBottom: '1rem' }}>Alle komende bezoeken</h2>
-					<p className="subtitle is-6" style={{ 
+					<h2 className="h4" style={{ marginBottom: '1rem' }}>Alle komende bezoeken</h2>
+					<p className="text-muted mb-2" style={{ 
 						marginBottom: '1rem', 
-						color: 'var(--gray-700)',
 						lineHeight: '1.7',
 						wordWrap: 'break-word',
 						overflowWrap: 'break-word'
@@ -87,13 +86,13 @@ function UpcomingVisitsRoute() {
 				</section>
 
 				{error && (
-					<div className="notification is-danger mb-4" role="alert">
+					<div className="alert alert-danger mb-4" role="alert">
 						<strong>Het laden van de bezoeken is mislukt:</strong> {error.message}
 					</div>
 				)}
 
 				{!isLoading && !error && visits.length === 0 && (
-					<div className="notification is-light" role="status" style={{
+					<div className="alert alert-light" role="status" style={{
 						textAlign: 'center',
 						padding: '3rem 2rem',
 						background: 'linear-gradient(135deg, rgba(99, 102, 241, 0.05) 0%, rgba(139, 92, 246, 0.05) 100%)',
@@ -112,14 +111,13 @@ function UpcomingVisitsRoute() {
 				)}
 
 				{!isLoading && !error && visits.length > 0 && (
-					<div className="table-container" style={{
-						overflowX: 'auto',
+					<div className="table-responsive" style={{
 						background: 'white',
 						borderRadius: 'var(--radius-lg)',
 						boxShadow: 'var(--shadow-md)',
 						border: '1px solid var(--gray-200)'
 					}}>
-						<table className="table is-fullwidth is-striped is-hoverable" style={{ margin: 0 }}>
+						<table className="table table-striped table-hover mb-0">
 							<thead>
 								<tr>
 									<th style={{ 
@@ -128,7 +126,7 @@ function UpcomingVisitsRoute() {
 										color: 'var(--gray-900)',
 										padding: '1rem'
 									}}>
-										<div className="is-flex is-align-items-center">
+										<div className="d-flex align-items-center">
 											<Clock size={18} style={{ marginRight: '0.5rem' }} />
 											<span>Tijd</span>
 										</div>
@@ -139,7 +137,7 @@ function UpcomingVisitsRoute() {
 										color: 'var(--gray-900)',
 										padding: '1rem'
 									}}>
-										<div className="is-flex is-align-items-center">
+										<div className="d-flex align-items-center">
 											<User size={18} style={{ marginRight: '0.5rem' }} />
 											<span>Bezoeker</span>
 										</div>
@@ -159,7 +157,7 @@ function UpcomingVisitsRoute() {
 												fontSize: '1.1rem',
 												color: 'var(--gray-900)'
 											}}>
-												<div className="is-flex is-align-items-center">
+												<div className="d-flex align-items-center">
 													<Calendar size={20} style={{ marginRight: '0.75rem' }} />
 													<span>{formatDate(date)}</span>
 												</div>
@@ -172,14 +170,14 @@ function UpcomingVisitsRoute() {
 												<tr key={visit.id}>
 													<td style={{ padding: '1rem', verticalAlign: 'middle' }}>
 														<div>
-															<span className="has-text-weight-semibold">{visit.time}</span>
-															<span className="has-text-grey" style={{ marginLeft: '0.5rem' }}>
+															<span className="fw-semibold">{visit.time}</span>
+															<span className="text-secondary" style={{ marginLeft: '0.5rem' }}>
 																- {departureTime}
 															</span>
 														</div>
 													</td>
 													<td style={{ padding: '1rem', verticalAlign: 'middle' }}>
-														<span className="has-text-weight-medium">{visit.visitorName}</span>
+														<span className="fw-medium">{visit.visitorName}</span>
 													</td>
 												</tr>
 											)
@@ -192,8 +190,8 @@ function UpcomingVisitsRoute() {
 				)}
 
 				{isLoading && (
-					<div className="has-text-centered" style={{ padding: '3rem' }}>
-						<p className="subtitle is-6 has-text-grey">Bezoeken laden...</p>
+					<div className="text-center" style={{ padding: '3rem' }}>
+						<p className="text-muted">Bezoeken laden...</p>
 					</div>
 				)}
 			</div>

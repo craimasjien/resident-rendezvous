@@ -30,21 +30,19 @@ export default function AppLayout({ children }: PropsWithChildren) {
 
   return (
     <div className="app-layout">
-      <header className="hero is-primary">
-        <div className="hero-body">
-          <div className="container has-text-centered">
-            <h1 className="title">{ import.meta.env.VITE_APP_NAME || 'Resident Rendezvous' }</h1>
-            <p className="subtitle">{ import.meta.env.VITE_APP_DESCRIPTION || 'Coordinate family visits with ease' }</p>
-          </div>
+      <header className="bg-primary text-white py-5">
+        <div className="container text-center">
+          <h1 className="display-4 fw-bold mb-2">{ import.meta.env.VITE_APP_NAME || 'Resident Rendezvous' }</h1>
+          <p className="lead mb-0">{ import.meta.env.VITE_APP_DESCRIPTION || 'Coordinate family visits with ease' }</p>
         </div>
       </header>
 
-      <main className="section">
+      <main className="py-5">
         <div className="container">
           {authError ? (
-            <div className="notification is-danger" role="alert">
-              <h2 className="title is-5">We konden je niet anoniem aanmelden. Probeer het later nog eens.</h2>
-              <p>{authError}</p>
+            <div className="alert alert-danger" role="alert">
+              <h2 className="h5">We konden je niet anoniem aanmelden. Probeer het later nog eens.</h2>
+              <p className="mb-0">{authError}</p>
             </div>
           ) : null}
 
@@ -52,16 +50,16 @@ export default function AppLayout({ children }: PropsWithChildren) {
         </div>
       </main>
 
-      <footer className="footer">
-        <div className="content has-text-centered">
+      <footer className="footer bg-dark text-light py-4 mt-auto">
+        <div className="container text-center">
           {userId ? (
-            <p className="subtitle is-6">
-              <span className="is-size-7 has-text-grey mt-2">
-              Jouw bezoeker ID: <strong className="has-text-primary">{userId}</strong>
-              </span>
+            <p className="mb-0">
+              <small className="text-muted">
+              Jouw bezoeker ID: <strong className="text-primary">{userId}</strong>
+              </small>
             </p>
           ) : (
-            <p className="subtitle is-6 has-text-grey">Verbinden...</p>
+            <p className="mb-0 text-muted">Verbinden...</p>
           )}
         </div>
       </footer>

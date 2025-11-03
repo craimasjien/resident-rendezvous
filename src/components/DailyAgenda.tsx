@@ -87,9 +87,8 @@ export default function DailyAgenda({ selectedDate }: DailyAgendaProps) {
     <>
       <div className="daily-agenda">
         <header className="mb-5" style={{ marginBottom: '2.5rem' }}>
-          <h2 className="title is-4 mb-3" style={{ marginBottom: '1.25rem' }}>Geplande bezoeken op {formattedDate}</h2>
-          <p className="subtitle is-6 mb-4" style={{ 
-            color: 'var(--gray-600)',
+          <h2 className="h4 mb-3" style={{ marginBottom: '1.25rem' }}>Geplande bezoeken op {formattedDate}</h2>
+          <p className="text-muted mb-4" style={{ 
             marginBottom: '2rem',
             lineHeight: '1.7',
             wordWrap: 'break-word',
@@ -105,7 +104,7 @@ export default function DailyAgenda({ selectedDate }: DailyAgendaProps) {
         </header>
 
         {error && (
-          <div className="notification is-danger mb-4" role="alert">
+          <div className="alert alert-danger mb-4" role="alert">
             <strong>Het laden van de bezoeken is mislukt:</strong> {error.message}
           </div>
         )}
@@ -129,7 +128,7 @@ export default function DailyAgenda({ selectedDate }: DailyAgendaProps) {
                 })}
               </div>
             ) : (
-              <div className="notification is-light" role="status" style={{
+              <div className="alert alert-light" role="status" style={{
                 textAlign: 'center',
                 padding: '3rem 2rem',
                 background: 'linear-gradient(135deg, rgba(99, 102, 241, 0.05) 0%, rgba(139, 92, 246, 0.05) 100%)',
@@ -152,7 +151,7 @@ export default function DailyAgenda({ selectedDate }: DailyAgendaProps) {
         <div className="mt-5">
           <button
             type="button"
-            className="button is-primary is-fullwidth"
+            className="btn btn-primary w-100"
             onClick={() => setIsModalOpen(true)}
             disabled={isLoading}
             style={{

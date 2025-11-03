@@ -185,48 +185,40 @@ export default function BookingModal({
 	const conflict = checkConflict();
 
 	const modalContent = (
-		<div className="modal is-active">
-			<div
-				className="modal-background"
-				onClick={(e) => e.target === e.currentTarget && !isSubmitting && onClose()}
-				onKeyDown={(e) => e.key === "Escape" && !isSubmitting && onClose()}
-				role="button"
-				tabIndex={-1}
-				aria-label="Sluit modal"
-			/>
-			<div className="modal-card">
-				<header className="modal-card-head">
-					<p className="modal-card-title">
-						{isEditing ? "Wijzig je bezoek" : "Plan een bezoek"}
-					</p>
-					<button
-						type="button"
-						className="delete"
-						aria-label="sluiten"
-						onClick={onClose}
-						disabled={isSubmitting}
-					/>
-				</header>
-				<form onSubmit={handleSubmit}>
-					<section className="modal-card-body">
-						<div className="notification is-info mb-4" role="alert">
-							<strong>Let op:</strong> Bezoeken kunnen niet overlappen met de maaltijden van <b>12:00-13:00</b> en <b>17:00-18:00</b>.
-						</div>
-
-						{error && (
-							<div className="notification is-danger mb-4" role="alert">
-								{error}
+		<div className="modal show d-block" style={{ backgroundColor: 'rgba(0,0,0,0.5)' }} tabIndex={-1} onClick={(e) => e.target === e.currentTarget && !isSubmitting && onClose()}>
+			<div className="modal-dialog modal-dialog-centered" onClick={(e) => e.stopPropagation()}>
+				<div className="modal-content">
+					<div className="modal-header bg-primary text-white">
+						<h5 className="modal-title">
+							{isEditing ? "Wijzig je bezoek" : "Plan een bezoek"}
+						</h5>
+						<button
+							type="button"
+							className="btn-close btn-close-white"
+							aria-label="sluiten"
+							onClick={onClose}
+							disabled={isSubmitting}
+						/>
+					</div>
+					<form onSubmit={handleSubmit}>
+						<div className="modal-body">
+							<div className="alert alert-info mb-4" role="alert">
+								<strong>Let op:</strong> Bezoeken kunnen niet overlappen met de maaltijden van <b>12:00-13:00</b> en <b>17:00-18:00</b>.
 							</div>
-						)}
 
-						<div className="field">
-							<label htmlFor="visitor-name" className="label">
-								Bezoekersnaam <span className="has-text-danger">*</span>
-							</label>
-							<div className="control">
+							{error && (
+								<div className="alert alert-danger mb-4" role="alert">
+									{error}
+								</div>
+							)}
+
+							<div className="mb-3">
+								<label htmlFor="visitor-name" className="form-label">
+									Bezoekersnaam <span className="text-danger">*</span>
+								</label>
 								<input
 									id="visitor-name"
-									className="input"
+									className="form-control"
 									type="text"
 									placeholder="Voer je naam in"
 									value={visitorName}
@@ -235,16 +227,14 @@ export default function BookingModal({
 									required
 								/>
 							</div>
-						</div>
 
-						<div className="field">
-							<label htmlFor="visit-date" className="label">
-								Datum <span className="has-text-danger">*</span>
-							</label>
-							<div className="control">
+							<div className="mb-3">
+								<label htmlFor="visit-date" className="form-label">
+									Datum <span className="text-danger">*</span>
+								</label>
 								<input
 									id="visit-date"
-									className="input"
+									className="form-control"
 									type="date"
 									value={date}
 									onChange={(e) => setDate(e.target.value)}
@@ -252,16 +242,14 @@ export default function BookingModal({
 									required
 								/>
 							</div>
-						</div>
 
-						<div className="field">
-							<label htmlFor="visit-time" className="label">
-								Tijd <span className="has-text-danger">*</span>
-							</label>
-							<div className="control">
+							<div className="mb-3">
+								<label htmlFor="visit-time" className="form-label">
+									Tijd <span className="text-danger">*</span>
+								</label>
 								<input
 									id="visit-time"
-									className="input"
+									className="form-control"
 									type="time"
 									value={time}
 									onChange={(e) => setTime(e.target.value)}
@@ -269,16 +257,14 @@ export default function BookingModal({
 									required
 								/>
 							</div>
-						</div>
 
-						<div className="field">
-							<label htmlFor="duration" className="label">
-								Duur (minuten) <span className="has-text-danger">*</span>
-							</label>
-							<div className="control">
+							<div className="mb-3">
+								<label htmlFor="duration" className="form-label">
+									Duur (minuten) <span className="text-danger">*</span>
+								</label>
 								<input
 									id="duration"
-									className="input"
+									className="form-control"
 									type="number"
 									value={durationMinutes}
 									onChange={(e) =>
@@ -288,16 +274,14 @@ export default function BookingModal({
 									required
 								/>
 							</div>
-						</div>
 
-						<div className="field">
-							<label htmlFor="description" className="label">
-								Beschrijving (optioneel)
-							</label>
-							<div className="control">
+							<div className="mb-3">
+								<label htmlFor="description" className="form-label">
+									Beschrijving (optioneel)
+								</label>
 								<textarea
 									id="description"
-									className="textarea"
+									className="form-control"
 									placeholder="Voeg notities toe over dit bezoek..."
 									value={description}
 									onChange={(e) => setDescription(e.target.value)}
@@ -306,25 +290,26 @@ export default function BookingModal({
 								/>
 							</div>
 						</div>
-					</section>
-					<footer className="modal-card-foot">
-						<button
-							type="submit"
-							className={`button is-primary ${isSubmitting ? "is-loading" : ""}`}
-							disabled={isSubmitting || conflict !== null}
-						>
-							{isEditing ? "Bezoek bijwerken" : "Bezoek inplannen"}
-						</button>
-						<button
-							type="button"
-							className="button"
-							onClick={onClose}
-							disabled={isSubmitting}
-						>
-							Annuleren
-						</button>
-					</footer>
-				</form>
+						<div className="modal-footer">
+							<button
+								type="submit"
+								className={`btn btn-primary ${isSubmitting ? "disabled" : ""}`}
+								disabled={isSubmitting || conflict !== null}
+							>
+								{isSubmitting && <span className="spinner-border spinner-border-sm me-2" role="status" aria-hidden="true"></span>}
+								{isEditing ? "Bezoek bijwerken" : "Bezoek inplannen"}
+							</button>
+							<button
+								type="button"
+								className="btn btn-secondary"
+								onClick={onClose}
+								disabled={isSubmitting}
+							>
+								Annuleren
+							</button>
+						</div>
+					</form>
+				</div>
 			</div>
 		</div>
 	);

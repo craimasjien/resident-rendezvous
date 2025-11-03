@@ -94,16 +94,15 @@ function HomeRoute() {
 
 	return (
 		<div className="home-route">
-			<section className="content mb-6" style={{ 
+			<section className="content mb-5" style={{ 
 				padding: '2rem',
 				background: 'linear-gradient(135deg, rgba(99, 102, 241, 0.05) 0%, rgba(139, 92, 246, 0.05) 100%)',
 				borderRadius: 'var(--radius-xl)',
 				border: '1px solid var(--gray-200)'
 			}}>
-				<h2 className="title is-4" style={{ marginBottom: '1rem' }}>Coördineer bezoeken</h2>
-				<p className="subtitle is-6" style={{ 
+				<h2 className="h4" style={{ marginBottom: '1rem' }}>Coördineer bezoeken</h2>
+				<p className="text-muted mb-2" style={{ 
 					marginBottom: '1rem', 
-					color: 'var(--gray-700)',
 					lineHeight: '1.7',
 					wordWrap: 'break-word',
 					overflowWrap: 'break-word'
@@ -122,11 +121,11 @@ function HomeRoute() {
 				</p>
 			</section>
 
-			<div className="columns is-variable is-5 is-multiline">
-				<div className="column is-one-third-desktop is-full-tablet is-full-mobile">
+			<div className="row g-4">
+				<div className="col-md-4 col-12">
 					<VisitCalendar selectedDate={selectedDate} onDateChange={handleDateChange} />
 				</div>
-				<div className="column is-two-thirds-desktop is-full-tablet is-full-mobile">
+				<div className="col-md-8 col-12">
 					<DailyAgenda selectedDate={selectedDate} />
 				</div>
 			</div>
