@@ -33,8 +33,8 @@ export default function AppLayout({ children }: PropsWithChildren) {
       <section className="hero is-primary">
         <div className="hero-body">
           <div className="container has-text-centered">
-            <p className="title">Resident Rendezvous</p>
-            <p className="subtitle">Plan loving visits together, without the hassle.</p>
+            <p className="title">{ import.meta.env.VITE_APP_NAME }</p>
+            <p className="subtitle">{ import.meta.env.VITE_APP_DESCRIPTION }</p>
           </div>
         </div>
       </section>
@@ -43,7 +43,7 @@ export default function AppLayout({ children }: PropsWithChildren) {
         <div className="container">
           {authError ? (
             <div className="notification is-danger" role="alert">
-              <h2 className="title is-5">We couldn't start anonymous sign-in</h2>
+              <h2 className="title is-5">We konden je niet anoniem aanmelden. Probeer het later nog eens.</h2>
               <p>{authError}</p>
             </div>
           ) : null}
@@ -56,10 +56,8 @@ export default function AppLayout({ children }: PropsWithChildren) {
         <div className="content has-text-centered">
           {userId ? (
             <p className="subtitle is-6">
-              Your Visitor ID: <strong className="has-text-primary">{userId}</strong>
-              <br />
               <span className="is-size-7 has-text-grey mt-2">
-                Share this ID with family members to coordinate visits together
+              Jouw bezoeker ID: <strong className="has-text-primary">{userId}</strong>
               </span>
             </p>
           ) : (

@@ -174,20 +174,20 @@ export default function VisitCalendar({
 	return (
 		<div className="visit-calendar">
 			<header className="mb-4">
-				<p className="title is-5">Select a day</p>
+				<p className="title is-5">Selecteer een dag</p>
 				<p className="subtitle is-6">
-					The family agenda updates instantly as you browse.
+					De agenda wordt direct bijgewerkt wanneer je bladert.
 				</p>
 			</header>
 			{error ? (
 				<div className="notification is-warning">
-					<strong>Calendar Error:</strong> {error}
+					<strong>Agenda fout:</strong> {error}
 				</div>
 			) : (
 				<div>
 					{isLoading && (
 						<div className="has-text-centered py-4">
-							<span className="has-text-grey">Loading calendar...</span>
+							<span className="has-text-grey">Agenda laden...</span>
 						</div>
 					)}
 					<div ref={containerRef} className="calendar-container" />

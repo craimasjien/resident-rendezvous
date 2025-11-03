@@ -45,11 +45,11 @@ export default function OfflineToast({ isOffline }: OfflineToastProps) {
 				onClick={() => setIsVisible(false)}
 				aria-label="Close notification"
 			/>
-			<strong>{isOffline ? 'Offline' : 'Back Online'}</strong>
+			<strong>{isOffline ? 'Offline' : 'Terug online'}</strong>
 			<br />
 			{isOffline
-				? 'You are offline. Your bookings will be saved when connection is restored.'
-				: 'Connection restored. Your changes have been saved.'}
+				? 'Je bent offline. Je bezoek zal worden opgeslagen wanneer je weer online bent.'
+				: 'Verbinding hersteld. Je bezoek is opgeslagen.'}
 		</div>
 	);
 }

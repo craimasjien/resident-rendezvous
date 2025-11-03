@@ -17,10 +17,9 @@ function HomeRoute() {
 	return (
 		<div className="home-route">
 			<section className="content mb-6">
-				<h2 className="title is-4">Coordinate family visits with confidence</h2>
+				<h2 className="title is-4">Coördineer bezoeken</h2>
 				<p className="subtitle is-6">
-					Choose a day on the calendar to preview how the shared agenda will feel
-					on launch day.
+					Selecteer een dag op de agenda om te bekijken hoe de geplande bezoeken eruit zullen zien.
 				</p>
 			</section>
 

@@ -14,7 +14,7 @@ interface DailyAgendaProps {
   selectedDate: string
 }
 
-const dayFormatter = new Intl.DateTimeFormat(undefined, {
+const dayFormatter = new Intl.DateTimeFormat('nl', {
   weekday: 'long',
   month: 'long',
   day: 'numeric',
@@ -96,19 +96,19 @@ export default function DailyAgenda({ selectedDate }: DailyAgendaProps) {
     <>
       <div className="daily-agenda">
         <header className="mb-5">
-          <p className="title is-4">Visits on {formattedDate}</p>
+          <p className="title is-4">Geplande bezoeken op {formattedDate}</p>
           <p className="subtitle is-6">
             {isLoading
-              ? 'Loading visits...'
+              ? 'Bezoeken laden...'
               : error
-                ? 'Unable to load visits. Please refresh the page.'
-                : 'The family agenda updates instantly as you browse.'}
+                ? 'Het laden van de bezoeken is mislukt. Probeer het later nog eens.'
+                : '' }
           </p>
         </header>
 
         {error && (
           <div className="notification is-danger mb-4" role="alert">
-            <strong>Error loading visits:</strong> {error.message}
+            <strong>Het laden van de bezoeken is mislukt:</strong> {error.message}
           </div>
         )}
 
@@ -168,7 +168,7 @@ export default function DailyAgenda({ selectedDate }: DailyAgendaProps) {
               </div>
             ) : (
               <div className="notification is-light" role="status">
-                No visits scheduled yet. Be the first to plan a stop by!
+                Er zijn nog geen bezoeken gepland. Wees de eerste die langskomt!
               </div>
             )}
           </>
@@ -181,7 +181,7 @@ export default function DailyAgenda({ selectedDate }: DailyAgendaProps) {
             onClick={() => setIsModalOpen(true)}
             disabled={isLoading}
           >
-            Schedule a Visit
+            Plan een bezoek
           </button>
         </div>
       </div>
