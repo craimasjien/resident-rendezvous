@@ -35,6 +35,9 @@ declare module '@tanstack/react-router' {
 getFirebaseApp()
 void initAnonymousAuth()
 
+// Set the document title from environment variable
+document.title = import.meta.env.VITE_APP_NAME ?? 'Resident Rendezvous'
+
 // Render the app
 const rootElement = document.getElementById('app')
 if (rootElement && !rootElement.innerHTML) {
