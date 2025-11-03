@@ -30,16 +30,16 @@ export default function AppLayout({ children }: PropsWithChildren) {
 
   return (
     <div className="app-layout">
-      <section className="hero is-primary">
+      <header className="hero is-primary">
         <div className="hero-body">
           <div className="container has-text-centered">
-            <p className="title">{ import.meta.env.VITE_APP_NAME }</p>
-            <p className="subtitle">{ import.meta.env.VITE_APP_DESCRIPTION }</p>
+            <h1 className="title">{ import.meta.env.VITE_APP_NAME || 'Resident Rendezvous' }</h1>
+            <p className="subtitle">{ import.meta.env.VITE_APP_DESCRIPTION || 'Coordinate family visits with ease' }</p>
           </div>
         </div>
-      </section>
+      </header>
 
-      <section className="section">
+      <main className="section">
         <div className="container">
           {authError ? (
             <div className="notification is-danger" role="alert">
@@ -50,7 +50,7 @@ export default function AppLayout({ children }: PropsWithChildren) {
 
           <div className="box">{children}</div>
         </div>
-      </section>
+      </main>
 
       <footer className="footer">
         <div className="content has-text-centered">

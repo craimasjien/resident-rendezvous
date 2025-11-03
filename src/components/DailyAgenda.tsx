@@ -86,9 +86,16 @@ export default function DailyAgenda({ selectedDate }: DailyAgendaProps) {
   return (
     <>
       <div className="daily-agenda">
-        <header className="mb-5">
-          <p className="title is-4 mb-3">Geplande bezoeken op {formattedDate}</p>
-          <p className="subtitle is-6 mb-4">
+        <header className="mb-5" style={{ marginBottom: '2.5rem' }}>
+          <h2 className="title is-4 mb-3" style={{ marginBottom: '1.25rem' }}>Geplande bezoeken op {formattedDate}</h2>
+          <p className="subtitle is-6 mb-4" style={{ 
+            color: 'var(--gray-600)',
+            marginBottom: '2rem',
+            lineHeight: '1.7',
+            wordWrap: 'break-word',
+            overflowWrap: 'break-word',
+            paddingBottom: '0.5rem'
+          }}>
             {isLoading
               ? 'Bezoeken laden...'
               : error
@@ -122,8 +129,21 @@ export default function DailyAgenda({ selectedDate }: DailyAgendaProps) {
                 })}
               </div>
             ) : (
-              <div className="notification is-light" role="status">
-                Er zijn nog geen bezoeken gepland. Wees de eerste die langskomt!
+              <div className="notification is-light" role="status" style={{
+                textAlign: 'center',
+                padding: '3rem 2rem',
+                background: 'linear-gradient(135deg, rgba(99, 102, 241, 0.05) 0%, rgba(139, 92, 246, 0.05) 100%)',
+                border: '2px dashed var(--gray-300)',
+                borderRadius: 'var(--radius-xl)'
+              }}>
+                <p style={{ 
+                  fontSize: '1.125rem',
+                  color: 'var(--gray-700)',
+                  margin: 0,
+                  fontWeight: '500'
+                }}>
+                  Er zijn nog geen bezoeken gepland. Wees de eerste die langskomt! 🎉
+                </p>
               </div>
             )}
           </>
@@ -135,6 +155,12 @@ export default function DailyAgenda({ selectedDate }: DailyAgendaProps) {
             className="button is-primary is-fullwidth"
             onClick={() => setIsModalOpen(true)}
             disabled={isLoading}
+            style={{
+              fontSize: '1.0625rem',
+              fontWeight: '600',
+              padding: '1rem 1.5rem',
+              boxShadow: 'var(--shadow-primary)'
+            }}
           >
             Plan een bezoek
           </button>

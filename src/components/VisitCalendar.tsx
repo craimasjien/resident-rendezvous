@@ -168,24 +168,30 @@ export default function VisitCalendar({
 
     return (
         <div className="visit-calendar">
-            <header className="mb-4">
-                <p className="title is-5">Selecteer een dag</p>
-                <p className="subtitle is-6">
+            <header className="mb-5" style={{ marginBottom: '2.5rem' }}>
+                <h2 className="title is-5" style={{ marginBottom: '1rem' }}>Selecteer een dag</h2>
+                <p className="subtitle is-6" style={{ 
+                    color: 'var(--gray-600)',
+                    marginBottom: '0',
+                    lineHeight: '1.7',
+                    minHeight: '3rem',
+                    paddingBottom: '0.5rem'
+                }}>
                     De agenda wordt direct bijgewerkt wanneer je bladert.
                 </p>
             </header>
             {error ? (
-                <div className="notification is-warning">
+                <div className="notification is-warning mb-4">
                     <strong>Agenda fout:</strong> {error}
                 </div>
             ) : (
-                <div>
+                <div style={{ marginTop: '2rem' }}>
                     {(visitsLoading || isInitializing) && (
                         <div className="has-text-centered py-4">
                             <span className="has-text-grey">Agenda laden...</span>
                         </div>
                     )}
-                    <div ref={containerRef} className="calendar-container" />
+                    <div ref={containerRef} className="calendar-container" style={{ marginTop: '1rem' }} />
                 </div>
             )}
         </div>

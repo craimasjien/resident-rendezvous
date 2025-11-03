@@ -1,11 +1,87 @@
+/* Modern Design System - Resident Rendezvous */
+
+/* ============================================
+   CSS Variables & Design Tokens
+   ============================================ */
+:root {
+  /* Color Palette */
+  --primary: #6366f1;
+  --primary-dark: #4f46e5;
+  --primary-light: #818cf8;
+  --secondary: #8b5cf6;
+  --accent: #ec4899;
+  --success: #10b981;
+  --warning: #f59e0b;
+  --danger: #ef4444;
+  --info: #3b82f6;
+  
+  /* Neutral Colors */
+  --gray-50: #f9fafb;
+  --gray-100: #f3f4f6;
+  --gray-200: #e5e7eb;
+  --gray-300: #d1d5db;
+  --gray-400: #9ca3af;
+  --gray-500: #6b7280;
+  --gray-600: #4b5563;
+  --gray-700: #374151;
+  --gray-800: #1f2937;
+  --gray-900: #111827;
+  
+  /* Gradients */
+  --gradient-primary: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  --gradient-secondary: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
+  --gradient-hero: linear-gradient(135deg, #667eea 0%, #764ba2 50%, #f093fb 100%);
+  --gradient-card: linear-gradient(135deg, rgba(255, 255, 255, 0.9) 0%, rgba(255, 255, 255, 0.95) 100%);
+  
+  /* Shadows */
+  --shadow-sm: 0 1px 2px 0 rgba(0, 0, 0, 0.05);
+  --shadow-md: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+  --shadow-lg: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
+  --shadow-xl: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04);
+  --shadow-2xl: 0 25px 50px -12px rgba(0, 0, 0, 0.25);
+  --shadow-primary: 0 10px 25px -5px rgba(99, 102, 241, 0.3);
+  
+  /* Spacing */
+  --spacing-xs: 0.5rem;
+  --spacing-sm: 0.75rem;
+  --spacing-md: 1rem;
+  --spacing-lg: 1.5rem;
+  --spacing-xl: 2rem;
+  --spacing-2xl: 3rem;
+  
+  /* Border Radius */
+  --radius-sm: 0.375rem;
+  --radius-md: 0.5rem;
+  --radius-lg: 0.75rem;
+  --radius-xl: 1rem;
+  --radius-2xl: 1.5rem;
+  --radius-full: 9999px;
+  
+  /* Transitions */
+  --transition-fast: 150ms ease-in-out;
+  --transition-base: 300ms ease-in-out;
+  --transition-slow: 500ms ease-in-out;
+}
+
+/* ============================================
+   Base Styles
+   ============================================ */
+* {
+  box-sizing: border-box;
+}
+
 body {
   margin: 0;
-  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", "Roboto", "Oxygen",
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", "Roboto", "Inter", "Oxygen",
     "Ubuntu", "Cantarell", "Fira Sans", "Droid Sans", "Helvetica Neue",
     sans-serif;
-  background-color: #f5f5f5;
+  background: linear-gradient(135deg, #667eea15 0%, #764ba215 50%, #f093fb15 100%);
+  background-attachment: fixed;
+  min-height: 100vh;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
+  color: var(--gray-800);
+  line-height: 1.6;
 }
 
 #app {
@@ -13,46 +89,731 @@ body {
 }
 
 code {
-  font-family: source-code-pro, Menlo, Monaco, Consolas, "Courier New",
-    monospace;
+  font-family: "SF Mono", "Monaco", "Inconsolata", "Fira Code", "Fira Mono", "Droid Sans Mono",
+    "Source Code Pro", monospace;
+  background: var(--gray-100);
+  padding: 0.125rem 0.375rem;
+  border-radius: var(--radius-sm);
+  font-size: 0.875em;
 }
 
+/* ============================================
+   App Layout Modernization
+   ============================================ */
+.app-layout {
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+}
+
+/* Hero Section */
+.hero.is-primary {
+  background: var(--gradient-hero);
+  background-size: 200% 200%;
+  animation: gradientShift 15s ease infinite;
+  padding: 3rem 1.5rem;
+  box-shadow: var(--shadow-lg);
+  position: relative;
+  overflow: hidden;
+}
+
+.hero.is-primary::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: radial-gradient(circle at 20% 50%, rgba(255, 255, 255, 0.1) 0%, transparent 50%),
+              radial-gradient(circle at 80% 80%, rgba(255, 255, 255, 0.1) 0%, transparent 50%);
+  pointer-events: none;
+}
+
+@keyframes gradientShift {
+  0%, 100% { background-position: 0% 50%; }
+  50% { background-position: 100% 50%; }
+}
+
+.hero-body {
+  position: relative;
+  z-index: 1;
+}
+
+.hero-body .title {
+  color: white;
+  font-size: 2.5rem;
+  font-weight: 700;
+  text-shadow: 0 2px 10px rgba(0, 0, 0, 0.2);
+  margin-bottom: 0.5rem;
+  letter-spacing: -0.02em;
+}
+
+.hero-body .subtitle {
+  color: rgba(255, 255, 255, 0.95);
+  font-size: 1.125rem;
+  font-weight: 400;
+  text-shadow: 0 1px 5px rgba(0, 0, 0, 0.1);
+}
+
+.title:not(.is-spaced) + .subtitle {
+  margin-top: 0;
+}
+
+/* Main Section */
+.section {
+  padding: 3rem 1.5rem;
+  flex: 1;
+}
+
+.container {
+  max-width: 1200px;
+  margin: 0 auto;
+}
+
+/* Modern Box/Card */
+.box {
+  background: rgba(255, 255, 255, 0.95);
+  backdrop-filter: blur(10px);
+  border-radius: var(--radius-xl);
+  box-shadow: var(--shadow-xl);
+  padding: 2.5rem;
+  border: 1px solid rgba(255, 255, 255, 0.5);
+  transition: all var(--transition-base);
+}
+
+.box:hover {
+  box-shadow: var(--shadow-2xl);
+  transform: translateY(-2px);
+}
+
+/* Footer */
+.footer {
+  background: var(--gray-800);
+  color: var(--gray-300);
+  padding: 2rem 1.5rem;
+  margin-top: auto;
+  box-shadow: 0 -4px 6px -1px rgba(0, 0, 0, 0.1);
+}
+
+.footer .subtitle {
+  color: var(--gray-400);
+  font-size: 0.875rem;
+}
+
+.footer .has-text-primary {
+  color: var(--primary-light) !important;
+  font-weight: 600;
+}
+
+/* ============================================
+   Typography Enhancements
+   ============================================ */
+.title {
+  font-weight: 700;
+  letter-spacing: -0.02em;
+  color: var(--gray-900);
+}
+
+.title.is-4 {
+  font-size: 1.75rem;
+  margin-bottom: 1rem;
+}
+
+.title.is-5 {
+  font-size: 1.5rem;
+  margin-bottom: 0.75rem;
+}
+
+.subtitle {
+  font-weight: 400;
+  color: var(--gray-600);
+  line-height: 1.7;
+}
+
+.subtitle.is-6 {
+  font-size: 1rem;
+  line-height: 1.7;
+  word-wrap: break-word;
+  overflow-wrap: break-word;
+}
+
+/* ============================================
+   Button Modernization
+   ============================================ */
+.button {
+  border-radius: var(--radius-lg);
+  font-weight: 600;
+  padding: 0.625rem 1.5rem;
+  transition: all var(--transition-base);
+  border: none;
+  box-shadow: var(--shadow-sm);
+  position: relative;
+  overflow: hidden;
+}
+
+.button::before {
+  content: '';
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  width: 0;
+  height: 0;
+  border-radius: 50%;
+  background: rgba(255, 255, 255, 0.3);
+  transform: translate(-50%, -50%);
+  transition: width 0.6s, height 0.6s;
+}
+
+.button:hover::before {
+  width: 300px;
+  height: 300px;
+}
+
+.button.is-primary {
+  background: var(--gradient-primary);
+  color: white;
+  box-shadow: var(--shadow-primary);
+}
+
+.button.is-primary:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 15px 30px -5px rgba(99, 102, 241, 0.4);
+}
+
+.button.is-primary:active {
+  transform: translateY(0);
+}
+
+.button.is-fullwidth {
+  width: 100%;
+  padding: 0.875rem 1.5rem;
+  font-size: 1rem;
+}
+
+.button.is-light {
+  background: var(--gray-100);
+  color: var(--gray-700);
+}
+
+.button.is-light:hover {
+  background: var(--gray-200);
+  transform: translateY(-1px);
+}
+
+.button.is-danger {
+  background: var(--danger);
+  color: white;
+}
+
+.button.is-danger:hover {
+  background: #dc2626;
+  transform: translateY(-2px);
+  box-shadow: 0 10px 25px -5px rgba(239, 68, 68, 0.3);
+}
+
+.button.is-small {
+  padding: 0.5rem 1rem;
+  font-size: 0.875rem;
+}
+
+.button.is-loading {
+  opacity: 0.7;
+  cursor: not-allowed;
+}
+
+/* ============================================
+   Card Modernization
+   ============================================ */
+.card {
+  background: white;
+  border-radius: var(--radius-xl);
+  box-shadow: var(--shadow-md);
+  border: 1px solid var(--gray-200);
+  overflow: hidden;
+  transition: all var(--transition-base);
+  position: relative;
+}
+
+.card:hover {
+  box-shadow: var(--shadow-xl);
+  transform: translateY(-4px);
+}
+
+.card.is-success {
+  border-left: 4px solid var(--success);
+  background: linear-gradient(135deg, rgba(16, 185, 129, 0.05) 0%, rgba(255, 255, 255, 1) 100%);
+}
+
+.card.is-success.is-light {
+  background: linear-gradient(135deg, rgba(16, 185, 129, 0.08) 0%, rgba(255, 255, 255, 1) 100%);
+}
+
+.card-content {
+  padding: 1.75rem;
+}
+
+/* ============================================
+   Visit Card Enhancements
+   ============================================ */
+.visit-card-mobile-layout {
+  display: flex;
+  align-items: flex-start;
+  gap: 1rem;
+}
+
+.visit-detail-item {
+  display: flex;
+  align-items: center;
+  margin-bottom: 0.875rem;
+  padding: 0.5rem 0;
+  border-bottom: 1px solid var(--gray-100);
+}
+
+.visit-detail-item:last-child {
+  border-bottom: none;
+}
+
+.visit-card-buttons {
+  display: flex;
+  gap: 0.5rem;
+}
+
+.visit-card-buttons .button {
+  box-shadow: var(--shadow-sm);
+}
+
+.visit-card-buttons .button:hover {
+  transform: translateY(-2px);
+  box-shadow: var(--shadow-md);
+}
+
+/* ============================================
+   Form Modernization
+   ============================================ */
+.field {
+  margin-bottom: 1.5rem;
+}
+
+.label {
+  font-weight: 600;
+  color: var(--gray-700);
+  margin-bottom: 0.5rem;
+  font-size: 0.9375rem;
+}
+
+.input,
+.textarea,
+.select select {
+  border-radius: var(--radius-lg);
+  border: 2px solid var(--gray-300);
+  padding: 0.75rem 1rem;
+  font-size: 1rem;
+  transition: all var(--transition-base);
+  background: white;
+  box-shadow: var(--shadow-sm);
+}
+
+.input:focus,
+.textarea:focus,
+.select select:focus {
+  outline: none;
+  border-color: var(--primary);
+  box-shadow: 0 0 0 3px rgba(99, 102, 241, 0.1);
+  transform: translateY(-1px);
+}
+
+.input:hover,
+.textarea:hover {
+  border-color: var(--gray-400);
+}
+
+.textarea {
+  resize: vertical;
+  min-height: 100px;
+}
+
+/* ============================================
+   Modal Modernization
+   ============================================ */
+.modal-background {
+  background: rgba(0, 0, 0, 0.7);
+  backdrop-filter: blur(4px);
+}
+
+.modal-card {
+  border-radius: var(--radius-2xl);
+  overflow: hidden;
+  box-shadow: var(--shadow-2xl);
+  max-width: 600px;
+  margin: 0 auto;
+}
+
+.modal-card-head {
+  background: var(--gradient-primary);
+  color: white;
+  padding: 1.5rem;
+  border-bottom: none;
+}
+
+.modal-card-title {
+  font-weight: 700;
+  font-size: 1.5rem;
+  color: white;
+  margin: 0;
+}
+
+.modal-card-body {
+  padding: 2rem;
+  background: white;
+}
+
+.modal-card-foot {
+  padding: 1.5rem 2rem;
+  background: var(--gray-50);
+  border-top: 1px solid var(--gray-200);
+  display: flex;
+  gap: 1rem;
+  justify-content: flex-end;
+}
+
+.delete {
+  background: rgba(255, 255, 255, 0.3);
+  border-radius: var(--radius-full);
+  transition: all var(--transition-fast);
+}
+
+.delete:hover {
+  background: rgba(255, 255, 255, 0.5);
+  transform: rotate(90deg);
+}
+
+/* ============================================
+   Notification/Alert Modernization
+   ============================================ */
+.notification {
+  border-radius: var(--radius-lg);
+  padding: 1.25rem 1.5rem;
+  box-shadow: var(--shadow-md);
+  border-left: 4px solid;
+  animation: slideIn 0.3s ease-out;
+}
+
+@keyframes slideIn {
+  from {
+    opacity: 0;
+    transform: translateY(-10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.notification.is-danger {
+  background: linear-gradient(135deg, rgba(239, 68, 68, 0.1) 0%, rgba(255, 255, 255, 1) 100%);
+  border-left-color: var(--danger);
+  color: var(--gray-800);
+}
+
+.notification.is-warning {
+  background: linear-gradient(135deg, rgba(245, 158, 11, 0.1) 0%, rgba(255, 255, 255, 1) 100%);
+  border-left-color: var(--warning);
+  color: var(--gray-800);
+}
+
+.notification.is-success {
+  background: linear-gradient(135deg, rgba(16, 185, 129, 0.1) 0%, rgba(255, 255, 255, 1) 100%);
+  border-left-color: var(--success);
+  color: var(--gray-800);
+}
+
+.notification.is-light {
+  background: var(--gray-50);
+  border-left-color: var(--gray-400);
+  color: var(--gray-700);
+}
+
+/* ============================================
+   Calendar Container
+   ============================================ */
+.visit-calendar {
+  background: white;
+  border-radius: var(--radius-xl);
+  padding: 2.5rem;
+  box-shadow: var(--shadow-lg);
+  border: 1px solid var(--gray-200);
+  min-height: 400px;
+}
+
+.visit-calendar header {
+  margin-bottom: 2.5rem;
+}
+
+.visit-calendar header .subtitle {
+  display: block;
+  word-wrap: break-word;
+  overflow-wrap: break-word;
+  margin-top: 0;
+  line-height: 1.7;
+}
+
+.calendar-container {
+  border-radius: var(--radius-lg);
+  overflow: hidden;
+  margin-top: 2rem;
+  min-height: 300px;
+}
+
+/* ============================================
+   Daily Agenda
+   ============================================ */
+.daily-agenda {
+  background: white;
+  border-radius: var(--radius-xl);
+  padding: 2.5rem;
+  box-shadow: var(--shadow-lg);
+  border: 1px solid var(--gray-200);
+}
+
+.daily-agenda header {
+  margin-bottom: 2.5rem;
+}
+
+.daily-agenda header .subtitle {
+  word-wrap: break-word;
+  overflow-wrap: break-word;
+  line-height: 1.7;
+}
+
+.agenda-list {
+  display: flex;
+  flex-direction: column;
+  gap: 1.25rem;
+}
+
+/* ============================================
+   Offline Toast
+   ============================================ */
+.notification.has-shadow {
+  box-shadow: var(--shadow-xl);
+  animation: slideInRight 0.4s cubic-bezier(0.68, -0.55, 0.265, 1.55);
+}
+
+@keyframes slideInRight {
+  from {
+    opacity: 0;
+    transform: translateX(100px);
+  }
+  to {
+    opacity: 1;
+    transform: translateX(0);
+  }
+}
+
+/* ============================================
+   Mobile Responsiveness
+   ============================================ */
+@media screen and (max-width: 768px) {
+  .hero.is-primary {
+    padding: 2rem 1rem;
+  }
+  
+  .hero-body .title {
+    font-size: 2rem;
+  }
+  
+  .section {
+    padding: 2rem 1rem;
+  }
+  
+  .box {
+    padding: 1.5rem;
+    border-radius: var(--radius-lg);
+  }
+  
+  .card-content {
+    padding: 1.25rem;
+  }
+  
+  .visit-card-mobile-layout {
+    flex-direction: column;
+  }
+  
+  .visit-card-buttons {
+    margin-left: 0 !important;
+    margin-top: 1rem;
+    width: 100%;
+    justify-content: flex-end;
+  }
+  
+  .visit-detail-item {
+    margin-bottom: 1rem;
+    flex-wrap: wrap;
+  }
+  
+  .daily-agenda header {
+    margin-bottom: 1.5rem;
+  }
+  
+  .daily-agenda .title {
+    margin-bottom: 1.25rem;
+  }
+  
+  .daily-agenda .subtitle {
+    margin-bottom: 0.5rem;
+  }
+  
+  .modal-card {
+    margin: 1rem;
+    max-width: calc(100% - 2rem);
+  }
+  
+  .modal-card-body {
+    padding: 1.5rem;
+  }
+  
+  .modal-card-foot {
+    padding: 1rem 1.5rem;
+    flex-direction: column;
+  }
+  
+  .modal-card-foot .button {
+    width: 100%;
+  }
+}
+
+/* ============================================
+   Utility Classes
+   ============================================ */
+.has-text-primary {
+  color: var(--primary) !important;
+}
+
+.has-text-grey {
+  color: var(--gray-600) !important;
+}
+
+.has-text-weight-semibold {
+  font-weight: 600;
+}
+
+.mb-0 { margin-bottom: 0 !important; }
+.mb-3 { margin-bottom: 1rem !important; }
+.mb-4 { margin-bottom: 1.5rem !important; }
+.mb-5 { margin-bottom: 2rem !important; }
+.mb-6 { margin-bottom: 2.5rem !important; }
+.mt-2 { margin-top: 0.5rem !important; }
+.mt-4 { margin-top: 1rem !important; }
+.mt-5 { margin-top: 2rem !important; }
+.py-4 { padding-top: 1rem; padding-bottom: 1rem; }
+
+/* ============================================
+   Calendar Overrides
+   ============================================ */
 .datetimepicker {
   max-width: 100%;
 }
 
-/* Mobile-specific spacing improvements */
-@media screen and (max-width: 768px) {
-  .daily-agenda header {
-    margin-bottom: 1.5rem !important;
-  }
+/* Ensure calendar styles work well with our design */
+.calendar-container .calendar {
+  border-radius: var(--radius-lg);
+  overflow: hidden;
+  box-shadow: var(--shadow-sm);
+}
 
-  .daily-agenda .title {
-    margin-bottom: 1.25rem !important;
-  }
+/* Enhance Bulma Calendar styling */
+.calendar-container .calendar-nav,
+.calendar-container .calendar-header {
+  background: var(--gradient-primary);
+  color: white;
+}
 
-  .daily-agenda .subtitle {
-    margin-bottom: 0.5rem !important;
-  }
+.calendar-container .calendar-date {
+  border-radius: var(--radius-md);
+  transition: all var(--transition-fast);
+}
 
-  .card-content {
-    padding: 1.25rem !important;
-  }
+.calendar-container .calendar-date:hover {
+  background: var(--primary-light);
+  transform: scale(1.05);
+}
 
-  /* Stack visit card content vertically on mobile */
-  .visit-card-mobile-layout {
-    flex-direction: column !important;
-  }
+.calendar-container .calendar-date.is-selected {
+  background: var(--primary);
+  box-shadow: var(--shadow-md);
+}
 
-  .visit-card-mobile-layout .visit-card-buttons {
-    margin-left: 0 !important;
-    margin-top: 1rem !important;
-    width: 100%;
-    justify-content: flex-end;
-  }
+.calendar-container .calendar-date.is-today {
+  border: 2px solid var(--primary);
+  font-weight: 700;
+}
 
-  /* Better spacing for visit details on mobile */
-  .visit-detail-item {
-    margin-bottom: 1rem !important;
+/* Content section improvements */
+.content {
+  color: var(--gray-700);
+}
+
+.content p {
+  margin-bottom: 1rem;
+  word-wrap: break-word;
+  overflow-wrap: break-word;
+  line-height: 1.7;
+}
+
+.content p:last-child {
+  margin-bottom: 0;
+}
+
+.content .title {
+  word-wrap: break-word;
+  overflow-wrap: break-word;
+}
+
+/* Home route enhancements */
+.home-route {
+  animation: fadeIn 0.5s ease-out;
+}
+
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+/* Smooth scrolling */
+html {
+  scroll-behavior: smooth;
+}
+
+/* Loading states */
+.is-loading {
+  position: relative;
+  pointer-events: none;
+  opacity: 0.6;
+}
+
+.is-loading::after {
+  content: '';
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  width: 1.5rem;
+  height: 1.5rem;
+  margin-top: -0.75rem;
+  margin-left: -0.75rem;
+  border: 3px solid var(--gray-300);
+  border-top-color: var(--primary);
+  border-radius: 50%;
+  animation: spin 0.6s linear infinite;
+}
+
+@keyframes spin {
+  to {
+    transform: rotate(360deg);
   }
 }
