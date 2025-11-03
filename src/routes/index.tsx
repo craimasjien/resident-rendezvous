@@ -118,7 +118,7 @@ function HomeRoute() {
 					overflowWrap: 'break-word',
 					paddingTop: '0.5rem'
 				}}>
-					Je kunt ook een bezoek wijzigen of verwijderen die je zelf hebt gemaakt.
+					Je kunt ook een bezoek wijzigen of verwijderen dat je zelf hebt gemaakt.
 				</p>
 			</section>
 
