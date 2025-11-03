@@ -130,6 +130,7 @@ web_modules/
 .env.test.local
 .env.production.local
 .env.local
+.env.production
 
 # parcel-bundler cache (https://parceljs.org/)
 .cache
@@ -208,4 +209,4 @@ dist
 .history
 .ionide
 
-# End of https://www.toptal.com/developers/gitignore/api/macos,linux,visualstudiocode,node.env.production
+# End of https://www.toptal.com/developers/gitignore/api/macos,linux,visualstudiocode,node
