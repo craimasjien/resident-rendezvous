@@ -1,43 +1,37 @@
-import { createFileRoute } from "@tanstack/react-router";
+import { useState } from 'react'
 
-export const Route = createFileRoute("/")({
+import { createFileRoute } from '@tanstack/react-router'
+
+import DailyAgenda from '../components/DailyAgenda'
+import VisitCalendar from '../components/VisitCalendar'
+
+const resolveToday = () => new Date().toISOString().slice(0, 10)
+
+export const Route = createFileRoute('/')({
 	component: HomeRoute,
-});
+})
 
 function HomeRoute() {
+	const [selectedDate, setSelectedDate] = useState(resolveToday)
+
 	return (
-		<div className="box has-text-centered">
-			<h2 className="title is-4">Welcome to Resident Rendezvous</h2>
-			<p className="subtitle is-6">
-				Phase 0 is in place. Bulma styling is active and Firebase bootstrap is
-				ready.
-			</p>
-
-			<div className="content">
-				<p>
-					Next up: connect Firestore, wire up the calendar shell, and bring the
-					shared visit agenda to life.
+		<div className="home-route">
+			<section className="content mb-6">
+				<h2 className="title is-4">Coordinate family visits with confidence</h2>
+				<p className="subtitle is-6">
+					Choose a day on the calendar to preview how the shared agenda will feel
+					on launch day.
 				</p>
-			</div>
+			</section>
 
-			<div className="buttons is-centered mt-4">
-				<a
-					className="button is-primary is-light"
-					href="https://firebase.google.com/docs/auth/web/anonymous-auth"
-					target="_blank"
-					rel="noreferrer"
-				>
-					Review anonymous auth
-				</a>
-				<a
-					className="button is-link is-light"
-					href="https://bulma.io/documentation/"
-					target="_blank"
-					rel="noreferrer"
-				>
-					Bulma documentation
-				</a>
+			<div className="columns is-variable is-5 is-multiline">
+				<div className="column is-one-third is-full-mobile">
+					<VisitCalendar selectedDate={selectedDate} onDateChange={setSelectedDate} />
+				</div>
+				<div className="column is-two-thirds is-full-mobile">
+					<DailyAgenda selectedDate={selectedDate} />
+				</div>
 			</div>
 		</div>
-	);
+	)
 }

@@ -14,3 +14,12 @@ interface ImportMeta {
   readonly env: ImportMetaEnv
 }
 
+declare const bulmaCalendar:
+  | undefined
+  | {
+      attach: (
+        target: string | HTMLElement,
+        options?: Record<string, unknown>,
+      ) => unknown
+    }
+
