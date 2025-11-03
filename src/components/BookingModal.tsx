@@ -249,7 +249,7 @@ export default function BookingModal({
 									type="number"
 									value={durationMinutes}
 									onChange={(e) =>
-										setDurationMinutes(Number.parseInt(e.target.value, 10) || 0)
+										setDurationMinutes(Number.parseInt(e.target.value, 10))
 									}
 									disabled={isSubmitting}
 									required

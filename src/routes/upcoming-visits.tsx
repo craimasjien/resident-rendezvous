@@ -1,7 +1,10 @@
+import { useMemo } from 'react'
+import React from 'react'
 import { createFileRoute } from '@tanstack/react-router'
 import { Calendar, Clock, User } from 'lucide-react'
 
 import { useVisits } from '@/hooks/useVisits'
+import type { Visit } from '@/types/visit'
 
 export const Route = createFileRoute('/upcoming-visits')({
 	component: UpcomingVisitsRoute,
@@ -35,6 +38,32 @@ function UpcomingVisitsRoute() {
 		}
 		return dayFormatter.format(parsedDate)
 	}
+
+	// Group visits by date
+	const visitsByDate = useMemo(() => {
+		const grouped = new Map<string, Visit[]>()
+		
+		visits.forEach(visit => {
+			const dateKey = visit.date
+			if (!grouped.has(dateKey)) {
+				grouped.set(dateKey, [])
+			}
+			grouped.get(dateKey)!.push(visit)
+		})
+
+		// Sort dates and visits within each date group
+		const sortedDates = Array.from(grouped.keys()).sort()
+		const result: Array<{ date: string; visits: Visit[] }> = []
+		
+		sortedDates.forEach(date => {
+			const dayVisits = grouped.get(date)!
+			// Sort visits by time within each day
+			dayVisits.sort((a, b) => a.time.localeCompare(b.time))
+			result.push({ date, visits: dayVisits })
+		})
+
+		return result
+	}, [visits])
 
 	return (
 		<>
@@ -100,17 +129,6 @@ function UpcomingVisitsRoute() {
 										padding: '1rem'
 									}}>
 										<div className="is-flex is-align-items-center">
-											<Calendar size={18} style={{ marginRight: '0.5rem' }} />
-											<span>Datum</span>
-										</div>
-									</th>
-									<th style={{ 
-										background: 'var(--gray-50)',
-										fontWeight: '600',
-										color: 'var(--gray-900)',
-										padding: '1rem'
-									}}>
-										<div className="is-flex is-align-items-center">
 											<Clock size={18} style={{ marginRight: '0.5rem' }} />
 											<span>Tijd</span>
 										</div>
@@ -129,28 +147,45 @@ function UpcomingVisitsRoute() {
 								</tr>
 							</thead>
 							<tbody>
-								{visits.map(visit => {
-									const departureTime = calculateDepartureTime(visit.time, visit.durationMinutes)
-
-									return (
-										<tr key={visit.id}>
-											<td style={{ padding: '1rem', verticalAlign: 'middle' }}>
-												<span className="has-text-weight-semibold">{formatDate(visit.date)}</span>
-											</td>
-											<td style={{ padding: '1rem', verticalAlign: 'middle' }}>
-												<div>
-													<span className="has-text-weight-semibold">{visit.time}</span>
-													<span className="has-text-grey" style={{ marginLeft: '0.5rem' }}>
-														- {departureTime}
-													</span>
+								{visitsByDate.map(({ date, visits: dayVisits }) => (
+									<React.Fragment key={date}>
+										<tr style={{ 
+											background: 'var(--gray-100)',
+											borderTop: '2px solid var(--gray-300)'
+										}}>
+											<td colSpan={2} style={{ 
+												padding: '1rem',
+												fontWeight: '600',
+												fontSize: '1.1rem',
+												color: 'var(--gray-900)'
+											}}>
+												<div className="is-flex is-align-items-center">
+													<Calendar size={20} style={{ marginRight: '0.75rem' }} />
+													<span>{formatDate(date)}</span>
 												</div>
 											</td>
-											<td style={{ padding: '1rem', verticalAlign: 'middle' }}>
-												<span className="has-text-weight-medium">{visit.visitorName}</span>
-											</td>
 										</tr>
-									)
-								})}
+										{dayVisits.map(visit => {
+											const departureTime = calculateDepartureTime(visit.time, visit.durationMinutes)
+
+											return (
+												<tr key={visit.id}>
+													<td style={{ padding: '1rem', verticalAlign: 'middle' }}>
+														<div>
+															<span className="has-text-weight-semibold">{visit.time}</span>
+															<span className="has-text-grey" style={{ marginLeft: '0.5rem' }}>
+																- {departureTime}
+															</span>
+														</div>
+													</td>
+													<td style={{ padding: '1rem', verticalAlign: 'middle' }}>
+														<span className="has-text-weight-medium">{visit.visitorName}</span>
+													</td>
+												</tr>
+											)
+										})}
+									</React.Fragment>
+								))}
 							</tbody>
 						</table>
 					</div>
