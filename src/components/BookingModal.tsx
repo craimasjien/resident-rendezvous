@@ -55,17 +55,46 @@ export default function BookingModal({
 		setError(null);
 	}, [isOpen, initialDate, editingVisit]);
 
+	const parseTime = (t: string) => {
+		const [h, m] = t.split(":").map(Number);
+		return h * 60 + m;
+	};
+
+	const checkRestrictedTimeOverlap = (): string | null => {
+		if (!time || !durationMinutes) return null;
+
+		const start = parseTime(time);
+		const end = start + durationMinutes;
+
+		// Restricted periods: 12:00-13:00 (720-780 minutes) and 17:00-18:00 (1020-1080 minutes)
+		const lunchStart = 12 * 60; // 720 minutes
+		const lunchEnd = 13 * 60; // 780 minutes
+		const dinnerStart = 17 * 60; // 1020 minutes
+		const dinnerEnd = 18 * 60; // 1080 minutes
+
+		const overlapsLunch = start < lunchEnd && end > lunchStart;
+		const overlapsDinner = start < dinnerEnd && end > dinnerStart;
+
+		if (overlapsLunch || overlapsDinner) {
+			const periods = [];
+			if (overlapsLunch) periods.push("12:00-13:00");
+			if (overlapsDinner) periods.push("17:00-18:00");
+			return `Bezoeken kunnen niet overlappen met de maaltijd van ${periods.join(" en ")}. Kies een andere tijd.`;
+		}
+
+		return null;
+	};
+
 	const checkConflict = (): string | null => {
 		if (!date || !time || !durationMinutes) return null;
+
+		// First check restricted time periods
+		const restrictedError = checkRestrictedTimeOverlap();
+		if (restrictedError) return restrictedError;
 
 		const conflictingVisits = visits.filter((visit) => {
 			if (isEditing && visit.id === editingVisit?.id) return false;
 			if (visit.date !== date) return false;
-
-			const parseTime = (t: string) => {
-				const [h, m] = t.split(":").map(Number);
-				return h * 60 + m;
-			};
 
 			const start1 = parseTime(time);
 			const end1 = start1 + durationMinutes;
@@ -91,8 +120,8 @@ export default function BookingModal({
 			if (conflict) {
 				return conflict;
 			}
-			// Clear conflict errors but preserve other errors
-			if (prevError && prevError.includes("overlapt")) {
+			// Clear conflict and restricted time errors but preserve other errors
+			if (prevError && (prevError.includes("overlapt") || prevError.includes("maaltijd") || prevError.includes("gereserveerde tijden"))) {
 				return null;
 			}
 			return prevError;
@@ -180,6 +209,10 @@ export default function BookingModal({
 				</header>
 				<form onSubmit={handleSubmit}>
 					<section className="modal-card-body">
+						<div className="notification is-info mb-4" role="alert">
+							<strong>Let op:</strong> Bezoeken kunnen niet overlappen met de maaltijden van <b>12:00-13:00</b> en <b>17:00-18:00</b>.
+						</div>
+
 						{error && (
 							<div className="notification is-danger mb-4" role="alert">
 								{error}
