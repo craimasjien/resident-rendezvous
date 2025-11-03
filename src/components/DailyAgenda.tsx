@@ -1,6 +1,11 @@
 import { useState, useMemo } from 'react'
+import { deleteDoc, doc } from 'firebase/firestore'
+import { Edit2, Trash2 } from 'lucide-react'
 
+import { getVisitsCollection } from '@/firebase/visitsCollection'
 import { useVisits } from '@/hooks/useVisits'
+import { useCurrentUserId } from '@/hooks/useCurrentUserId'
+import type { Visit } from '@/types/visit'
 
 import BookingModal from './BookingModal'
 
@@ -31,7 +36,10 @@ const summarizeDuration = (minutes: number) => {
 
 export default function DailyAgenda({ selectedDate }: DailyAgendaProps) {
   const { visits, isLoading, error } = useVisits()
+  const currentUserId = useCurrentUserId()
   const [isModalOpen, setIsModalOpen] = useState(false)
+  const [editingVisit, setEditingVisit] = useState<Visit | null>(null)
+  const [deletingVisitId, setDeletingVisitId] = useState<string | null>(null)
 
   const formattedDate = useMemo(() => {
     const parsedDate = new Date(`${selectedDate}T00:00:00`)
@@ -41,10 +49,47 @@ export default function DailyAgenda({ selectedDate }: DailyAgendaProps) {
     return dayFormatter.format(parsedDate)
   }, [selectedDate])
 
-  const dailyVisits = useMemo(
-    () => visits.filter(visit => visit.date === selectedDate),
-    [visits, selectedDate],
-  )
+  const dailyVisits = useMemo(() => {
+    // Filter visits by selected date using ISO date string format
+    const selectedDateISO = new Date(`${selectedDate}T00:00:00`).toISOString().slice(0, 10)
+    return visits.filter(visit => {
+      const visitDateISO = new Date(`${visit.date}T00:00:00`).toISOString().slice(0, 10)
+      return visitDateISO === selectedDateISO
+    })
+  }, [visits, selectedDate])
+
+  const handleDeleteVisit = async (visit: Visit) => {
+    if (!window.confirm(`Are you sure you want to delete the visit by ${visit.visitorName}?`)) {
+      return
+    }
+
+    setDeletingVisitId(visit.id)
+    try {
+      const collectionRef = getVisitsCollection()
+      const visitDocRef = doc(collectionRef, visit.id)
+      await deleteDoc(visitDocRef)
+      // Firestore listener will automatically update the UI
+    } catch (error) {
+      console.error('Error deleting visit', error)
+      alert(
+        error instanceof Error
+          ? `Failed to delete visit: ${error.message}`
+          : 'Failed to delete visit. Please try again.',
+      )
+    } finally {
+      setDeletingVisitId(null)
+    }
+  }
+
+  const handleEditVisit = (visit: Visit) => {
+    setEditingVisit(visit)
+    setIsModalOpen(true)
+  }
+
+  const handleCloseModal = () => {
+    setIsModalOpen(false)
+    setEditingVisit(null)
+  }
 
   return (
     <>
@@ -70,19 +115,53 @@ export default function DailyAgenda({ selectedDate }: DailyAgendaProps) {
           <>
             {dailyVisits.length > 0 ? (
               <div className="agenda-list">
-                {dailyVisits.map(visit => (
-                  <article key={visit.id} className="card mb-4">
-                    <div className="card-content">
-                      <p className="title is-5 mb-2">
-                        {visit.time} — {visit.visitorName}
-                      </p>
-                      <p className="subtitle is-6 mb-3">
-                        {summarizeDuration(visit.durationMinutes)}
-                      </p>
-                      {visit.description ? <p>{visit.description}</p> : null}
-                    </div>
-                  </article>
-                ))}
+                {dailyVisits.map(visit => {
+                  const isOwner = currentUserId !== null && visit.userId === currentUserId
+                  return (
+                    <article
+                      key={visit.id}
+                      className={`card mb-4 ${isOwner ? 'is-success is-light' : ''}`}
+                    >
+                      <div className="card-content">
+                        <div className="is-flex is-justify-content-space-between is-align-items-flex-start">
+                          <div className="is-flex-grow-1">
+                            <p className="title is-5 mb-2">
+                              {visit.time} — {visit.visitorName}
+                            </p>
+                            <p className="subtitle is-6 mb-3">
+                              {summarizeDuration(visit.durationMinutes)}
+                            </p>
+                            {visit.description ? <p>{visit.description}</p> : null}
+                          </div>
+                          {isOwner && (
+                            <div className="buttons has-addons">
+                              <button
+                                type="button"
+                                className="button is-small is-light"
+                                onClick={() => handleEditVisit(visit)}
+                                aria-label={`Edit visit by ${visit.visitorName}`}
+                                title="Edit visit"
+                                disabled={deletingVisitId === visit.id}
+                              >
+                                <Edit2 size={16} />
+                              </button>
+                              <button
+                                type="button"
+                                className="button is-small is-light is-danger"
+                                onClick={() => handleDeleteVisit(visit)}
+                                aria-label={`Delete visit by ${visit.visitorName}`}
+                                title="Delete visit"
+                                disabled={deletingVisitId === visit.id}
+                              >
+                                <Trash2 size={16} />
+                              </button>
+                            </div>
+                          )}
+                        </div>
+                      </div>
+                    </article>
+                  )
+                })}
               </div>
             ) : (
               <div className="notification is-light" role="status">
@@ -106,8 +185,9 @@ export default function DailyAgenda({ selectedDate }: DailyAgendaProps) {
 
       <BookingModal
         isOpen={isModalOpen}
-        onClose={() => setIsModalOpen(false)}
+        onClose={handleCloseModal}
         initialDate={selectedDate}
+        editingVisit={editingVisit}
       />
     </>
   )
