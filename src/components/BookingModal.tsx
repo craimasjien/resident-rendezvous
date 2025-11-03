@@ -1,5 +1,5 @@
 import { addDoc, doc, updateDoc } from "firebase/firestore";
-import { useCallback, useEffect, useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 
 import { getVisitsCollection } from "@/firebase/visitsCollection";
 import { useCurrentUserId } from "@/hooks/useCurrentUserId";
@@ -54,8 +54,8 @@ export default function BookingModal({
 	const [isSubmitting, setIsSubmitting] = useState(false);
 	const [errors, setErrors] = useState<FormErrors>({});
 	const [submitError, setSubmitError] = useState<string | null>(null);
-	const [conflictWarning, setConflictWarning] = useState<string | null>(null);
-	const [conflictConfirmed, setConflictConfirmed] = useState(false);
+	const [conflictError, setConflictError] = useState<string | null>(null);
+	const isSubmittingRef = useRef(false);
 
 	const isEditing = editingVisit !== null && editingVisit !== undefined;
 
@@ -116,7 +116,7 @@ export default function BookingModal({
 
 		if (conflictingVisits.length > 0) {
 			const names = conflictingVisits.map((v) => v.visitorName).join(", ");
-			return `Warning: This visit overlaps with existing visits by ${names}.`;
+			return `Dit bezoek overlapt met bestaande bezoeken van ${names}.`;
 		}
 
 		return null;
@@ -150,47 +150,46 @@ export default function BookingModal({
 			}
 			setErrors({});
 			setSubmitError(null);
-			setConflictWarning(null);
-			setConflictConfirmed(false);
+			setConflictError(null);
+			isSubmittingRef.current = false;
 		}
 	}, [isOpen, initialDate, editingVisit]);
 
 	// Check for conflicts when date, time, or duration changes
+	// Skip updating conflict error during submission to prevent flash
 	useEffect(() => {
+		if (isSubmitting || isSubmittingRef.current) {
+			return;
+		}
 		if (isOpen && date && time && durationMinutes) {
 			const conflict = detectConflicts();
-			setConflictWarning(conflict);
-			// Reset confirmation when conflict status changes
-			if (conflict) {
-				setConflictConfirmed(false);
-			}
+			setConflictError(conflict);
 		} else {
-			setConflictWarning(null);
-			setConflictConfirmed(false);
+			setConflictError(null);
 		}
-	}, [isOpen, date, time, durationMinutes, detectConflicts]);
+	}, [isOpen, date, time, durationMinutes, detectConflicts, isSubmitting]);
 
 	const validateForm = (): boolean => {
 		const newErrors: FormErrors = {};
 
 		if (!visitorName.trim()) {
-			newErrors.visitorName = "Visitor name is required";
+			newErrors.visitorName = "Bezoekersnaam is verplicht";
 		}
 
 		if (!date) {
-			newErrors.date = "Date is required";
+			newErrors.date = "Datum is verplicht";
 		} else if (!validateDate(date)) {
-			newErrors.date = "Please enter a valid date (yyyy-MM-dd)";
+			newErrors.date = "Voer een geldige datum in (jjjj-MM-dd)";
 		}
 
 		if (!time) {
-			newErrors.time = "Time is required";
+			newErrors.time = "Tijd is verplicht";
 		} else if (!validateTime(time)) {
-			newErrors.time = "Please enter a valid time (HH:mm)";
+			newErrors.time = "Voer een geldige tijd in (UU:mm)";
 		}
 
 		if (!durationMinutes || durationMinutes < 15) {
-			newErrors.durationMinutes = "Duration must be at least 15 minutes";
+			newErrors.durationMinutes = "Duur moet minimaal 15 minuten zijn";
 		}
 
 		setErrors(newErrors);
@@ -200,27 +199,26 @@ export default function BookingModal({
 	const handleSubmit = async (e: React.FormEvent) => {
 		e.preventDefault();
 		setSubmitError(null);
-		setConflictWarning(null);
 
 		if (!validateForm()) {
 			return;
 		}
 
 		if (!userId) {
-			setSubmitError("You must be signed in to book a visit");
+			setSubmitError("Je moet ingelogd zijn om een bezoek te plannen");
 			return;
 		}
 
-		// Check for conflicts
+		// Check for conflicts - prevent submission if conflict exists
 		const conflict = detectConflicts();
 		if (conflict) {
-			setConflictWarning(conflict);
-			// Block duplicates unless user has explicitly confirmed
-			if (!conflictConfirmed) {
-				return;
-			}
+			setConflictError(conflict);
+			return;
 		}
 
+		// Set ref first to prevent useEffect from running, then clear error
+		isSubmittingRef.current = true;
+		setConflictError(null);
 		setIsSubmitting(true);
 
 		try {
@@ -256,10 +254,11 @@ export default function BookingModal({
 			setSubmitError(
 				error instanceof Error
 					? error.message
-					: `Failed to ${isEditing ? "update" : "create"} visit. Please try again.`,
+					: `Bezoek ${isEditing ? "bijwerken" : "aanmaken"} mislukt. Probeer het opnieuw.`,
 			);
 		} finally {
 			setIsSubmitting(false);
+			isSubmittingRef.current = false;
 		}
 	};
 
@@ -293,17 +292,17 @@ export default function BookingModal({
 				onKeyDown={handleBackgroundKeyDown}
 				role="button"
 				tabIndex={-1}
-				aria-label="Close modal"
+				aria-label="Sluit modal"
 			/>
 			<div className="modal-card">
 				<header className="modal-card-head">
 					<p className="modal-card-title">
-						{isEditing ? "Edit Visit" : "Schedule a Visit"}
+						{isEditing ? "Wijzig je bezoek" : "Plan een bezoek"}
 					</p>
 					<button
 						type="button"
 						className="delete"
-						aria-label="close"
+						aria-label="sluiten"
 						onClick={handleClose}
 						disabled={isSubmitting}
 					/>
@@ -316,35 +315,26 @@ export default function BookingModal({
 							</div>
 						)}
 
-						{conflictWarning && (
-							<div className="notification is-warning mb-4" role="alert">
-								<strong>Conflict Detected:</strong> {conflictWarning}
-								<div className="field mt-4">
-									<label className="checkbox">
-										<input
-											type="checkbox"
-											checked={conflictConfirmed}
-											onChange={(e) => setConflictConfirmed(e.target.checked)}
-											disabled={isSubmitting}
-										/>
-										<span className="ml-2">
-											I understand there is a conflict and want to proceed anyway
-										</span>
-									</label>
-								</div>
+						{conflictError && (
+							<div className="notification is-danger mb-4" role="alert">
+								<strong>Conflict gedetecteerd:</strong> {conflictError}
+								<br />
+								<span className="is-size-7">
+									Kies een andere tijd of datum om conflicten te vermijden.
+								</span>
 							</div>
 						)}
 
 						<div className="field">
 							<label htmlFor="visitor-name" className="label">
-								Visitor Name <span className="has-text-danger">*</span>
+								Bezoekersnaam <span className="has-text-danger">*</span>
 							</label>
 							<div className="control">
 								<input
 									id="visitor-name"
 									className={`input ${errors.visitorName ? "is-danger" : ""}`}
 									type="text"
-									placeholder="Enter your name"
+									placeholder="Voer je naam in"
 									value={visitorName}
 									onChange={(e) => setVisitorName(e.target.value)}
 									disabled={isSubmitting}
@@ -358,7 +348,7 @@ export default function BookingModal({
 
 						<div className="field">
 							<label htmlFor="visit-date" className="label">
-								Date <span className="has-text-danger">*</span>
+								Datum <span className="has-text-danger">*</span>
 							</label>
 							<div className="control">
 								<input
@@ -376,7 +366,7 @@ export default function BookingModal({
 
 						<div className="field">
 							<label htmlFor="visit-time" className="label">
-								Time <span className="has-text-danger">*</span>
+								Tijd <span className="has-text-danger">*</span>
 							</label>
 							<div className="control">
 								<input
@@ -394,7 +384,7 @@ export default function BookingModal({
 
 						<div className="field">
 							<label htmlFor="duration" className="label">
-								Duration (minutes) <span className="has-text-danger">*</span>
+								Duur (minuten) <span className="has-text-danger">*</span>
 							</label>
 							<div className="control">
 								<input
@@ -418,13 +408,13 @@ export default function BookingModal({
 
 						<div className="field">
 							<label htmlFor="description" className="label">
-								Description (optional)
+								Beschrijving (optioneel)
 							</label>
 							<div className="control">
 								<textarea
 									id="description"
 									className="textarea"
-									placeholder="Add any notes about this visit..."
+									placeholder="Voeg notities toe over dit bezoek..."
 									value={description}
 									onChange={(e) => setDescription(e.target.value)}
 									disabled={isSubmitting}
@@ -437,14 +427,14 @@ export default function BookingModal({
 						<button
 							type="submit"
 							className={`button is-primary ${isSubmitting ? "is-loading" : ""}`}
-							disabled={isSubmitting || (conflictWarning !== null && !conflictConfirmed)}
+							disabled={isSubmitting || conflictError !== null}
 							title={
-								conflictWarning && !conflictConfirmed
-									? "Please confirm the conflict to proceed"
+								conflictError
+									? "Los het conflict op voordat je het bezoek aanmaakt"
 									: undefined
 							}
 						>
-							{isEditing ? "Update Visit" : "Schedule Visit"}
+							{isEditing ? "Bezoek bijwerken" : "Bezoek inplannen"}
 						</button>
 						<button
 							type="button"
@@ -452,7 +442,7 @@ export default function BookingModal({
 							onClick={handleClose}
 							disabled={isSubmitting}
 						>
-							Cancel
+							Annuleren
 						</button>
 					</footer>
 				</form>
