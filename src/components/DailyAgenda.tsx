@@ -1,6 +1,5 @@
 import { useState, useMemo } from 'react'
 import { deleteDoc, doc } from 'firebase/firestore'
-import { useNavigate } from '@tanstack/react-router'
 
 import { getVisitsCollection } from '@/firebase/visitsCollection'
 import { useVisits } from '@/hooks/useVisits'
@@ -12,6 +11,7 @@ import VisitCard from './VisitCard'
 
 interface DailyAgendaProps {
   selectedDate: string
+  onDateChange?: (date: string) => void
 }
 
 const dayFormatter = new Intl.DateTimeFormat('nl', {
@@ -20,8 +20,7 @@ const dayFormatter = new Intl.DateTimeFormat('nl', {
   day: 'numeric',
 })
 
-export default function DailyAgenda({ selectedDate }: DailyAgendaProps) {
-  const navigate = useNavigate()
+export default function DailyAgenda({ selectedDate, onDateChange }: DailyAgendaProps) {
   const { visits, isLoading, error } = useVisits()
   const currentUserId = useCurrentUserId()
   const [isModalOpen, setIsModalOpen] = useState(false)
@@ -37,12 +36,8 @@ export default function DailyAgenda({ selectedDate }: DailyAgendaProps) {
   }, [selectedDate])
 
   const dailyVisits = useMemo(() => {
-    // Filter visits by selected date using ISO date string format
-    const selectedDateISO = new Date(`${selectedDate}T00:00:00`).toISOString().slice(0, 10)
-    return visits.filter(visit => {
-      const visitDateISO = new Date(`${visit.date}T00:00:00`).toISOString().slice(0, 10)
-      return visitDateISO === selectedDateISO
-    })
+    // Filter visits by selected date (exact match on date string)
+    return visits.filter(visit => visit.date === selectedDate)
   }, [visits, selectedDate])
 
   const handleDeleteVisit = async (visit: Visit) => {
@@ -79,8 +74,10 @@ export default function DailyAgenda({ selectedDate }: DailyAgendaProps) {
   }
 
   const handleVisitCreated = (date: string) => {
-    // Navigate to index page with the date parameter
-    navigate({ to: '/', search: { date }, replace: true })
+    // Update the selected date to show the newly created visit
+    if (onDateChange) {
+      onDateChange(date)
+    }
   }
 
   return (

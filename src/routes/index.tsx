@@ -1,95 +1,27 @@
-import { useEffect, useRef } from 'react'
-import { createFileRoute, useNavigate } from '@tanstack/react-router'
+import { useState } from 'react'
+import { createFileRoute } from '@tanstack/react-router'
 
 import DailyAgenda from '../components/DailyAgenda'
 import VisitCalendar from '../components/VisitCalendar'
 
-const resolveToday = () => new Date().toISOString().slice(0, 10)
-
-// Check if a date string is before today
-const isBeforeToday = (dateStr: string): boolean => {
-	const today = resolveToday()
-	return dateStr < today
-}
-
-// Validate date format: yyyy-MM-dd
-const isValidDateString = (dateStr: string): boolean => {
-	const dateRegex = /^\d{4}-\d{2}-\d{2}$/
-	if (!dateRegex.test(dateStr)) return false
-	const date = new Date(dateStr)
-	return date instanceof Date && !isNaN(date.getTime()) && dateStr === date.toISOString().slice(0, 10)
+const resolveToday = () => {
+	const today = new Date();
+	const year = today.getFullYear();
+	const month = String(today.getMonth() + 1).padStart(2, '0');
+	const day = String(today.getDate()).padStart(2, '0');
+	return `${year}-${month}-${day}`;
 }
 
 export const Route = createFileRoute('/')({
-	validateSearch: (search: Record<string, unknown>) => {
-		return {
-			date: typeof search.date === 'string' && isValidDateString(search.date) ? search.date : undefined,
-		}
-	},
 	component: HomeRoute,
 })
 
 function HomeRoute() {
-	const navigate = useNavigate()
-	const { date: urlDate } = Route.useSearch()
-	const scrollPositionRef = useRef<number | null>(null)
-	const isDateChangeRef = useRef(false)
-	
-	// Redirect to today if URL date is in the past
-	useEffect(() => {
-		if (urlDate && isBeforeToday(urlDate)) {
-			navigate({ to: '/', search: { date: undefined }, replace: true })
-		}
-	}, [urlDate, navigate])
-	
-	// Restore scroll position after date-only URL changes
-	useEffect(() => {
-		if (isDateChangeRef.current && scrollPositionRef.current !== null) {
-			// Use multiple attempts to ensure scroll restoration happens after TanStack Router's scroll restoration
-			const restoreScroll = () => {
-				if (scrollPositionRef.current !== null) {
-					window.scrollTo(0, scrollPositionRef.current)
-				}
-			}
-			
-			// Try immediately
-			restoreScroll()
-			
-			// Try on next frame
-			requestAnimationFrame(() => {
-				restoreScroll()
-			})
-			
-			// Try after a short delay to ensure it happens after TanStack Router's scroll restoration
-			setTimeout(() => {
-				restoreScroll()
-				isDateChangeRef.current = false
-			}, 100)
-		}
-	}, [urlDate])
-	
-	// Use URL date if present and not in the past, otherwise default to today
-	const selectedDate = urlDate && !isBeforeToday(urlDate) ? urlDate : resolveToday()
+	const [selectedDate, setSelectedDate] = useState(() => resolveToday())
 
-	// Update URL when date changes via calendar
+	// Update date immediately when changed via calendar
 	const handleDateChange = (date: string) => {
-		const today = resolveToday()
-		// Don't allow selecting dates in the past
-		if (isBeforeToday(date)) {
-			return
-		}
-		
-		// Preserve scroll position before navigation
-		scrollPositionRef.current = window.scrollY
-		isDateChangeRef.current = true
-		
-		if (date === today) {
-			// Remove date param if it's today
-			navigate({ to: '/', search: { date: undefined }, replace: true })
-		} else {
-			// Set date param if it's not today
-			navigate({ to: '/', search: { date }, replace: true })
-		}
+		setSelectedDate(date)
 	}
 
 	return (
@@ -126,7 +58,7 @@ function HomeRoute() {
 					<VisitCalendar selectedDate={selectedDate} onDateChange={handleDateChange} />
 				</div>
 				<div className="col-md-8 col-12">
-					<DailyAgenda selectedDate={selectedDate} />
+					<DailyAgenda selectedDate={selectedDate} onDateChange={handleDateChange} />
 				</div>
 			</div>
 		</div>
