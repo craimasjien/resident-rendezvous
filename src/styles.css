@@ -162,14 +162,9 @@ header.bg-primary .lead {
 .footer {
   background: var(--gray-800);
   color: var(--gray-300);
-  padding: 2rem 1.5rem;
+  padding: 1rem 1.5rem;
   margin-top: auto;
-  box-shadow: 0 -4px 6px -1px rgba(0, 0, 0, 0.1);
-}
-
-.footer .subtitle {
-  color: var(--gray-400);
-  font-size: 0.875rem;
+  box-shadow: 0 -2px 4px -1px rgba(0, 0, 0, 0.1);
 }
 
 

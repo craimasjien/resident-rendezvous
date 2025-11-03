@@ -50,16 +50,14 @@ export default function AppLayout({ children }: PropsWithChildren) {
         </div>
       </main>
 
-      <footer className="footer bg-dark text-light py-4 mt-auto">
+      <footer className="footer bg-dark py-3 mt-auto">
         <div className="container text-center">
           {userId ? (
-            <p className="mb-0">
-              <small className="text-muted">
-              Jouw bezoeker ID: <strong className="text-primary">{userId}</strong>
-              </small>
+            <p className="mb-0 small text-white-50">
+              Jouw bezoeker ID: <span className="text-white fw-semibold">{userId}</span>
             </p>
           ) : (
-            <p className="mb-0 text-muted">Verbinden...</p>
+            <p className="mb-0 small text-white-50">Verbinden...</p>
           )}
         </div>
       </footer>
