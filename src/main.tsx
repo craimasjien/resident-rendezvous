@@ -9,6 +9,7 @@ import { routeTree } from './routeTree.gen'
 
 import './styles.css'
 import reportWebVitals from './reportWebVitals.ts'
+import { getFirebaseApp, initAnonymousAuth } from './firebaseClient.ts'
 
 // Create a new router instance
 
@@ -30,6 +31,9 @@ declare module '@tanstack/react-router' {
     router: typeof router
   }
 }
+
+getFirebaseApp()
+void initAnonymousAuth()
 
 // Render the app
 const rootElement = document.getElementById('app')

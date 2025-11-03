@@ -1,6 +1,5 @@
 ---
-description: Relevant when executing node/npm commands
-alwaysApply: false
+alwaysApply: true
 ---
 # Cursor Rules
 

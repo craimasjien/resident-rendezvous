@@ -1,39 +1,42 @@
 import { createFileRoute } from '@tanstack/react-router'
-import logo from '../logo.svg'
 
 export const Route = createFileRoute('/')({
-  component: App,
+  component: HomeRoute,
 })
 
-function App() {
+function HomeRoute() {
   return (
-    <div className="text-center">
-      <header className="min-h-screen flex flex-col items-center justify-center bg-[#282c34] text-white text-[calc(10px+2vmin)]">
-        <img
-          src={logo}
-          className="h-[40vmin] pointer-events-none animate-[spin_20s_linear_infinite]"
-          alt="logo"
-        />
+    <div className="box has-text-centered">
+      <h2 className="title is-4">Welcome to Resident Rendezvous</h2>
+      <p className="subtitle is-6">
+        Phase 0 is in place. Bulma styling is active and Firebase bootstrap is ready.
+      </p>
+
+      <div className="content">
         <p>
-          Edit <code>src/routes/index.tsx</code> and save to reload.
+          Next up: connect Firestore, wire up the calendar shell, and bring the shared visit
+          agenda to life.
         </p>
+      </div>
+
+      <div className="buttons is-centered mt-4">
         <a
-          className="text-[#61dafb] hover:underline"
-          href="https://reactjs.org"
+          className="button is-primary is-light"
+          href="https://firebase.google.com/docs/auth/web/anonymous-auth"
           target="_blank"
-          rel="noopener noreferrer"
+          rel="noreferrer"
         >
-          Learn React
+          Review anonymous auth
         </a>
         <a
-          className="text-[#61dafb] hover:underline"
-          href="https://tanstack.com"
+          className="button is-link is-light"
+          href="https://bulma.io/documentation/"
           target="_blank"
-          rel="noopener noreferrer"
+          rel="noreferrer"
         >
-          Learn TanStack
+          Bulma documentation
         </a>
-      </header>
+      </div>
     </div>
   )
 }
