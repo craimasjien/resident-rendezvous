@@ -36,9 +36,12 @@ export default function VisitForm({
 		<form onSubmit={onSubmit}>
 			<div className="modal-body">
 				<div className="alert alert-info mb-4" role="alert">
-					<strong>Let op:</strong> Bezoeken kunnen niet gepland worden tijdens
-					maaltijden (<b>12:00-13:00</b> en <b>17:00-18:00</b>) en rusttijd (
-					<b>13:00-15:00</b>).
+					<strong>Let op:</strong> Bezoeken kunnen alleen gepland worden tijdens
+					de volgende tijden:
+					<ul className="mb-0 mt-2">
+						<li><b>Maandag-vrijdag:</b> 09:00-12:00, 15:00-17:00 en 18:00-22:00</li>
+						<li><b>Zaterdag en zondag:</b> 09:00-22:00</li>
+					</ul>
 				</div>
 
 				{sameDayVisits && sameDayVisits.length > 0 && (
