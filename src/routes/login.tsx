@@ -8,17 +8,17 @@ export const Route = createFileRoute("/login")({
 });
 
 function LoginRoute() {
-	const { isAdmin, isAuthenticating } = useAuth();
+	const { isAdmin, isAuthenticating, isRoleLoading } = useAuth();
 	const navigate = useNavigate();
 
 	useEffect(() => {
-		// Redirect to dashboard if already logged in as admin
-		if (!isAuthenticating && isAdmin) {
+		// Only redirect if we've finished loading auth state AND role check, and user is admin
+		if (!isAuthenticating && !isRoleLoading && isAdmin) {
 			navigate({ to: "/dashboard" });
 		}
-	}, [isAdmin, isAuthenticating, navigate]);
+	}, [isAdmin, isAuthenticating, isRoleLoading, navigate]);
 
-	if (isAuthenticating) {
+	if (isAuthenticating || isRoleLoading) {
 		return (
 			<div className="text-center" style={{ padding: "3rem" }}>
 				<p className="text-muted">Laden...</p>

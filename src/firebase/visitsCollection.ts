@@ -8,11 +8,7 @@ import {
 } from "firebase/firestore";
 
 import { getFirebaseApp } from "@/firebaseClient";
-import {
-	getVisitsCollectionPath,
-	type Visit,
-	type VisitWriteData,
-} from "@/types/visit";
+import type { Visit, VisitWriteData } from "@/types/visit";
 
 export const visitConverter: FirestoreDataConverter<Visit, VisitWriteData> = {
 	toFirestore(visit) {
@@ -36,7 +32,6 @@ export const visitConverter: FirestoreDataConverter<Visit, VisitWriteData> = {
 export const getVisitsCollection = () => {
 	const app = getFirebaseApp();
 	const firestore = getFirestore(app);
-	const collectionPath = getVisitsCollectionPath();
 
-	return collection(firestore, collectionPath).withConverter(visitConverter);
+	return collection(firestore, "visits").withConverter(visitConverter);
 };

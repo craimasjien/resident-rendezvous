@@ -4,6 +4,8 @@ import {
 	onAuthStateChanged,
 	signInAnonymously,
 	signInWithEmailAndPassword,
+	signInWithPopup,
+	GoogleAuthProvider,
 	signOut as firebaseSignOut,
 	type User as FirebaseUser,
 } from "firebase/auth";
@@ -76,6 +78,20 @@ export const signInWithEmail = async (
 		return userCredential.user;
 	} catch (error) {
 		console.error("Failed to sign in with email", error);
+		throw error;
+	}
+};
+
+export const signInWithGoogle = async (): Promise<FirebaseUser> => {
+	const app = getFirebaseApp();
+	const auth = getAuth(app);
+	const provider = new GoogleAuthProvider();
+
+	try {
+		const userCredential = await signInWithPopup(auth, provider);
+		return userCredential.user;
+	} catch (error) {
+		console.error("Failed to sign in with Google", error);
 		throw error;
 	}
 };

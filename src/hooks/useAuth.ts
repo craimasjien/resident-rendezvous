@@ -11,7 +11,7 @@ export function useAuth() {
 	const [error, setError] = useState<string | null>(null);
 	const [isAnonymous, setIsAnonymous] = useState<boolean>(true);
 
-	const { role } = useUserRole(userId);
+	const { role, isLoading: isRoleLoading } = useUserRole(userId);
 
 	useEffect(() => {
 		let unsubscribe: (() => void) | undefined;
@@ -96,6 +96,7 @@ export function useAuth() {
 		error,
 		isAuthenticating: userId === null && error === null,
 		isAdmin: role === "administrator",
+		isRoleLoading,
 		isAnonymous,
 		signOut: handleSignOut,
 	};

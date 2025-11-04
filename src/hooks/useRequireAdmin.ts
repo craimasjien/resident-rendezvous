@@ -7,15 +7,16 @@ import { useAuth } from "@/hooks/useAuth";
  * Should be used in admin route components.
  */
 export function useRequireAdmin() {
-	const { isAdmin, isAuthenticating } = useAuth();
+	const { isAdmin, isAuthenticating, isRoleLoading } = useAuth();
 	const navigate = useNavigate();
 
 	useEffect(() => {
-		if (!isAuthenticating && !isAdmin) {
+		// Only redirect if we've finished loading auth state AND role check
+		if (!isAuthenticating && !isRoleLoading && !isAdmin) {
 			navigate({ to: "/login" });
 		}
-	}, [isAdmin, isAuthenticating, navigate]);
+	}, [isAdmin, isAuthenticating, isRoleLoading, navigate]);
 
-	return { isAdmin, isAuthenticating };
+	return { isAdmin, isAuthenticating: isAuthenticating || isRoleLoading };
 }
 
