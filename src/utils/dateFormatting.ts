@@ -6,18 +6,34 @@
  * Formats a date string (YYYY-MM-DD) to a long format (e.g., "maandag 15 januari 2024")
  */
 export function formatDateLong(dateStr: string, locale: string = "nl"): string {
-	const parsedDate = new Date(`${dateStr}T00:00:00`);
-	if (Number.isNaN(parsedDate.getTime())) {
+	if (!dateStr || typeof dateStr !== "string") {
 		return "Unknown date";
 	}
 
-	const formatter = new Intl.DateTimeFormat(locale, {
-		weekday: "long",
-		month: "long",
-		day: "numeric",
-	});
+	// Validate date string format (YYYY-MM-DD)
+	if (!/^\d{4}-\d{2}-\d{2}$/.test(dateStr)) {
+		console.error("Invalid date string format:", dateStr);
+		return "Unknown date";
+	}
 
-	return formatter.format(parsedDate);
+	try {
+		const parsedDate = new Date(`${dateStr}T00:00:00`);
+		if (Number.isNaN(parsedDate.getTime())) {
+			console.error("Invalid date parsed:", dateStr);
+			return "Unknown date";
+		}
+
+		const formatter = new Intl.DateTimeFormat(locale, {
+			weekday: "long",
+			month: "long",
+			day: "numeric",
+		});
+
+		return formatter.format(parsedDate);
+	} catch (error) {
+		console.error("Error formatting date:", error, dateStr);
+		return "Unknown date";
+	}
 }
 
 /**

@@ -32,19 +32,43 @@ export default function VisitCalendar({
 	const todayStr = getTodayDateString();
 
 	const handleDateClick = (day: number) => {
-		const date = createDateForDay(
-			currentMonth.getFullYear(),
-			currentMonth.getMonth(),
-			day,
-		);
-		const dateStr = formatDateString(date);
+		try {
+			// Validate inputs
+			if (!Number.isInteger(day) || day < 1 || day > 31) {
+				console.error("Invalid day value:", day);
+				return;
+			}
 
-		// Don't allow selecting dates in the past
-		if (dateStr < todayStr) {
-			return;
+			const date = createDateForDay(
+				currentMonth.getFullYear(),
+				currentMonth.getMonth(),
+				day,
+			);
+			
+			// Validate the date object
+			if (Number.isNaN(date.getTime())) {
+				console.error("Invalid date created:", { year: currentMonth.getFullYear(), month: currentMonth.getMonth(), day });
+				return;
+			}
+
+			const dateStr = formatDateString(date);
+
+			// Validate the date string format
+			if (!dateStr || !/^\d{4}-\d{2}-\d{2}$/.test(dateStr)) {
+				console.error("Invalid date string format:", dateStr);
+				return;
+			}
+
+			// Don't allow selecting dates in the past
+			if (dateStr < todayStr) {
+				return;
+			}
+
+			onDateChange(dateStr);
+		} catch (error) {
+			console.error("Error handling date click:", error);
+			// Don't crash the app, just log the error
 		}
-
-		onDateChange(dateStr);
 	};
 
 	const handlePrevMonth = () => {

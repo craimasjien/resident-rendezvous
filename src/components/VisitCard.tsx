@@ -133,7 +133,7 @@ export default function VisitCard({
             </div>
           </div>
 
-          {isOwner && (
+          {/* {isOwner && ( */}
             <div 
               className="btn-group visit-card-buttons" 
               style={{ 
@@ -176,7 +176,7 @@ export default function VisitCard({
                 <Trash2 size={18} />
               </button>
             </div>
-          )}
+          {/* )} */}
         </div>
       </div>
     </article>

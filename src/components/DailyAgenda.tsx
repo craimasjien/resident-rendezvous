@@ -1,4 +1,4 @@
-import { useMemo } from "react";
+import { useMemo, useEffect } from "react";
 import { useCurrentUserId } from "@/hooks/useCurrentUserId";
 import { useDailyVisits } from "@/hooks/useDailyVisits";
 import { useVisitActions } from "@/hooks/useVisitActions";
@@ -24,6 +24,14 @@ export default function DailyAgenda({
 	const { isOpen, editingVisit, openModal, closeModal, editVisit } =
 		useVisitModal();
 	const { deleteVisit, deletingVisitId } = useVisitActions();
+
+	// Sync selectedDate when editingVisit changes - if the visit being edited
+	// is on a different date than selectedDate, update selectedDate to match
+	useEffect(() => {
+		if (editingVisit && editingVisit.date !== selectedDate && onDateChange) {
+			onDateChange(editingVisit.date);
+		}
+	}, [editingVisit, selectedDate, onDateChange]);
 
 	const formattedDate = useMemo(
 		() => formatDateLong(selectedDate),
@@ -56,8 +64,9 @@ export default function DailyAgenda({
 	};
 
 	const handleVisitCreated = (date: string) => {
-		// Update the selected date to show the newly created visit
-		if (onDateChange) {
+		// Update the selected date to show the newly created/updated visit
+		// This is especially important when editing a visit and changing its date
+		if (onDateChange && date) {
 			onDateChange(date);
 		}
 	};

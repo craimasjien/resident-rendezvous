@@ -77,7 +77,9 @@ export default function BookingModal({
 
 			if (isEditing && editingVisit) {
 				await updateDoc(doc(collectionRef, editingVisit.id), visitData);
-				// Call callback with the date when a visit is updated (especially if date changed)
+				// Always call callback with the updated date to ensure UI syncs correctly
+				// This is critical when the visit date changes or when editing a visit
+				// that's on a different date than the currently selected date
 				if (onVisitCreated) {
 					onVisitCreated(formState.date);
 				}
