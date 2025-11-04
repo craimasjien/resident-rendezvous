@@ -7,6 +7,8 @@ import { useVisitForm } from "@/hooks/useVisitForm";
 import type { Visit, VisitWriteData } from "@/types/visit";
 import { sanitizeText } from "@/utils/sanitize";
 import VisitForm from "./forms/VisitForm";
+import { useDailyVisits } from "@/hooks/useDailyVisits";
+import { checkSameDayVisit } from "@/utils/visitValidation";
 
 interface BookingModalProps {
 	isOpen: boolean;
@@ -34,6 +36,13 @@ export default function BookingModal({
 		setSubmitting,
 		getValidationError,
 	} = useVisitForm(initialDate, editingVisit);
+
+	const { dailyVisits } = useDailyVisits(formState.date);
+	const { sameDayVisits } = checkSameDayVisit(
+		formState.date,
+		dailyVisits,
+		editingVisit?.id,
+	);
 
 	const handleSubmit = async (e: React.FormEvent) => {
 		e.preventDefault();
@@ -138,6 +147,7 @@ export default function BookingModal({
 						onSubmit={handleSubmit}
 						onCancel={onClose}
 						conflict={conflict}
+						sameDayVisits={sameDayVisits}
 					/>
 				</div>
 			</div>

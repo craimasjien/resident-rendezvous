@@ -1,5 +1,6 @@
 import { useId } from "react";
 import type { VisitFormState } from "@/hooks/useVisitForm";
+import type { Visit } from "@/types/visit";
 
 interface VisitFormProps {
 	formState: VisitFormState;
@@ -10,6 +11,7 @@ interface VisitFormProps {
 	onSubmit: (e: React.FormEvent) => void;
 	onCancel: () => void;
 	conflict: string | null;
+	sameDayVisits: Visit[] | null;
 }
 
 export default function VisitForm({
@@ -17,6 +19,7 @@ export default function VisitForm({
 	error,
 	isSubmitting,
 	isEditing,
+	sameDayVisits,
 	onChange,
 	onSubmit,
 	onCancel,
@@ -33,9 +36,16 @@ export default function VisitForm({
 		<form onSubmit={onSubmit}>
 			<div className="modal-body">
 				<div className="alert alert-info mb-4" role="alert">
-					<strong>Let op:</strong> Bezoeken kunnen niet overlappen met de
-					maaltijden van <b>12:00-13:00</b> en <b>17:00-18:00</b>.
+					<strong>Let op:</strong> Bezoeken kunnen niet gepland worden tijdens
+					maaltijden (<b>12:00-13:00</b> en <b>17:00-18:00</b>) en rusttijd (
+					<b>13:00-15:00</b>).
 				</div>
+
+				{sameDayVisits && sameDayVisits.length > 0 && (
+				<div className="alert alert-warning mb-4" role="alert">
+					<strong>Let op:</strong> Er is al een bezoek gepland op deze dag. Overweeg of dit niet te veel is en kies bij voorkeur een andere dag.
+				</div>
+				)}
 
 				{error && (
 					<div className="alert alert-danger mb-4" role="alert">

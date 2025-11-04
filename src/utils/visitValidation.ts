@@ -9,8 +9,9 @@ import { parseTime } from "./timeUtils";
  * Restricted time periods when visits cannot be scheduled
  */
 export const RESTRICTED_PERIODS = [
-	{ start: 12 * 60, end: 13 * 60, label: "12:00-13:00" },
-	{ start: 17 * 60, end: 18 * 60, label: "17:00-18:00" },
+	{ start: 12 * 60, end: 13 * 60, label: "12:00-13:00" }, // Maaltijd
+	{ start: 13 * 60, end: 15 * 60, label: "13:00-15:00" }, // Rusttijd
+	{ start: 17 * 60, end: 18 * 60, label: "17:00-18:00" }, // Maaltijd
 ] as const;
 
 /**
@@ -63,6 +64,22 @@ export function checkVisitConflict(
 	};
 }
 
+export function checkSameDayVisit(
+	date: string,
+	existingVisits: Visit[],
+	excludeVisitId?: string,
+): { hasSameDayVisit: boolean; sameDayVisits: Visit[] } {
+	const sameDayVisits = existingVisits.filter((visit) => {
+		if (excludeVisitId && visit.id === excludeVisitId) return false;
+		if (visit.date !== date) return false;
+		return true;
+	});
+	return {
+		hasSameDayVisit: sameDayVisits.length > 0,
+		sameDayVisits,
+	};
+}
+
 /**
  * Validates a visit and returns an error message if invalid, or null if valid
  */
@@ -81,7 +98,7 @@ export function validateVisit(
 	// First check restricted time periods
 	const restrictedCheck = checkRestrictedTimeOverlap(start, end);
 	if (restrictedCheck.overlaps) {
-		return `Bezoeken kunnen niet overlappen met de maaltijd van ${restrictedCheck.periods.join(" en ")}. Kies een andere tijd.`;
+		return `Bezoeken kunnen niet gepland worden tijdens maaltijden (12:00-13:00 en 17:00-18:00) en rusttijd (13:00-15:00). Kies een andere tijd.`;
 	}
 
 	// Then check conflicts with existing visits
