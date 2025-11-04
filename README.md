@@ -1,301 +1,200 @@
-Welcome to your new TanStack app! 
+# Resident Rendezvous
 
-# Getting Started
+A simple, friendly web application for coordinating family visits with a resident. Designed to help families schedule visits without calendar conflicts, logins, or confusing tooling.
 
-To run this application:
+## Goal
 
+Enable quick visit scheduling from any device, even for non-technical family members, while ensuring everyone sees the same up-to-date agenda in real time. The app protects privacy while allowing lightweight collaboration through anonymous authentication.
+
+## What It Does
+
+- **Calendar View**: Interactive calendar to select and view dates with scheduled visits
+- **Daily Agenda**: See all visits for a selected date with visitor names, times, and durations
+- **Upcoming Visits**: Comprehensive view of all future scheduled visits grouped by date
+- **Visit Booking**: Create new visits with visitor name, date, time, duration, and optional notes
+- **Visit Management**: Edit or delete visits you've created (ownership-based)
+- **Real-Time Sync**: Automatic updates across all devices when visits are added or modified
+- **Offline Support**: Notifications when the network connection is lost
+- **Privacy-First**: Uses anonymous authentication—no accounts or personal information required
+
+## Tech Stack
+
+### Frontend
+- **React 19** - UI framework
+- **TypeScript** - Type safety
+- **TanStack Router** - File-based routing with type-safe navigation
+- **TanStack Query** - Data fetching and caching
+- **Vite** - Build tool and dev server
+- **Lucide React** - Icon library
+
+### Backend & Services
+- **Firebase Firestore** - Real-time database for visit data
+- **Firebase Anonymous Authentication** - Privacy-preserving user identification
+- **Firebase Hosting** - Static site hosting
+
+### Development Tools
+- **Vitest** - Unit testing framework
+- **Biome** - Linting and formatting
+- **GitHub Actions** - CI/CD pipeline
+
+## Getting Started
+
+### Prerequisites
+
+- Node.js (version specified by your nvm installation)
+- npm
+- Firebase project with Firestore and Anonymous Authentication enabled
+
+### Installation
+
+1. Clone the repository:
 ```bash
-npm install
-npm run start
+git clone <repository-url>
+cd resident-rendezvous
 ```
 
-# Building For Production
+2. Install dependencies:
+```bash
+npm install
+```
 
-To build this application for production:
+3. Set up environment variables:
+   Create a `.env` file in the root directory with your Firebase configuration:
+```bash
+VITE_FIREBASE_API_KEY=your_api_key
+VITE_FIREBASE_AUTH_DOMAIN=your_auth_domain
+VITE_FIREBASE_PROJECT_ID=your_project_id
+VITE_FIREBASE_APP_ID=your_app_id
+VITE_APP_NAME=Resident Rendezvous
+VITE_APP_DESCRIPTION=Visit coordination app
+```
 
+### Running the Application
+
+Start the development server:
+```bash
+npm run dev
+```
+
+The app will be available at `http://localhost:3000`
+
+### Building for Production
+
+Build the application:
 ```bash
 npm run build
 ```
 
-## Testing
+The production build will be created in the `dist/` directory.
 
-This project uses [Vitest](https://vitest.dev/) for testing. You can run the tests with:
-
+Preview the production build locally:
 ```bash
-npm run test
+npm run serve
 ```
 
-## Styling
+### Deploying
 
-This project uses [Tailwind CSS](https://tailwindcss.com/) for styling.
+#### Manual Deployment
 
+Deploy to Firebase Hosting:
+```bash
+npm run deploy
+```
 
-## Linting & Formatting
+This command will:
+1. Build the application (`vite build`)
+2. Type-check the codebase (`tsc`)
+3. Deploy to Firebase Hosting (`firebase deploy`)
 
-This project uses [Biome](https://biomejs.dev/) for linting and formatting. The following scripts are available:
+#### Automated Deployment
 
+The project includes a GitHub Actions workflow (`.github/workflows/test-and-deploy.yml`) that:
+- Runs tests on every push and pull request
+- Automatically deploys to Firebase Hosting when changes are pushed to the `main` branch
 
+To use automated deployment:
+1. Set up the required GitHub Secrets:
+   - `VITE_FIREBASE_API_KEY`
+   - `VITE_FIREBASE_AUTH_DOMAIN`
+   - `VITE_FIREBASE_PROJECT_ID`
+   - `VITE_FIREBASE_APP_ID`
+   - `FIREBASE_SERVICE_ACCOUNT_RESIDENT_RENDEZVOUS`
+2. Set up GitHub Variables:
+   - `VITE_APP_NAME`
+   - `VITE_APP_DESCRIPTION`
+
+## Development
+
+### Testing
+
+Run the test suite:
+```bash
+npm test
+```
+
+### Linting and Formatting
+
+Check for linting issues:
 ```bash
 npm run lint
+```
+
+Fix linting issues automatically:
+```bash
+npm run lint:fix
+```
+
+Format code:
+```bash
 npm run format
+```
+
+Run both linting and formatting checks:
+```bash
 npm run check
 ```
 
+### Project Structure
 
-
-## Routing
-This project uses [TanStack Router](https://tanstack.com/router). The initial setup is a file based router. Which means that the routes are managed as files in `src/routes`.
-
-### Adding A Route
-
-To add a new route to your application just add another a new file in the `./src/routes` directory.
-
-TanStack will automatically generate the content of the route file for you.
-
-Now that you have two routes you can use a `Link` component to navigate between them.
-
-### Adding Links
-
-To use SPA (Single Page Application) navigation you will need to import the `Link` component from `@tanstack/react-router`.
-
-```tsx
-import { Link } from "@tanstack/react-router";
+```
+src/
+├── components/          # React components
+│   ├── calendar/       # Calendar-related components
+│   ├── forms/          # Form components
+│   ├── layout/         # Layout components
+│   └── visits/         # Visit-related components
+├── firebase/           # Firebase configuration and utilities
+├── hooks/              # Custom React hooks
+├── integrations/       # Third-party integrations
+├── routes/             # TanStack Router file-based routes
+├── types/              # TypeScript type definitions
+└── utils/              # Utility functions and tests
 ```
 
-Then anywhere in your JSX you can use it like so:
+## Features in Detail
 
-```tsx
-<Link to="/about">About</Link>
-```
+### Visit Management
 
-This will create a link that will navigate to the `/about` route.
+Visits are stored in Firestore with the following structure:
+- **Date**: ISO date string (YYYY-MM-DD)
+- **Time**: 24-hour format (HH:mm)
+- **Visitor Name**: Name of the visitor
+- **Duration**: Visit duration in minutes
+- **Description**: Optional notes about the visit
+- **User ID**: Anonymous Firebase Auth UID for ownership tracking
 
-More information on the `Link` component can be found in the [Link documentation](https://tanstack.com/router/v1/docs/framework/react/api/router/linkComponent).
+### Real-Time Updates
 
-### Using A Layout
+The app uses Firestore listeners to automatically sync visit data across all connected devices. Changes appear instantly without page refreshes.
 
-In the File Based Routing setup the layout is located in `src/routes/__root.tsx`. Anything you add to the root route will appear in all the routes. The route content will appear in the JSX where you use the `<Outlet />` component.
+### Offline Support
 
-Here is an example layout that includes a header:
+When the network connection is lost, users see a notification toast. The app will automatically sync when connectivity is restored.
 
-```tsx
-import { Outlet, createRootRoute } from '@tanstack/react-router'
-import { TanStackRouterDevtools } from '@tanstack/react-router-devtools'
+## License
 
-import { Link } from "@tanstack/react-router";
+[Add your license here]
 
-export const Route = createRootRoute({
-  component: () => (
-    <>
-      <header>
-        <nav>
-          <Link to="/">Home</Link>
-          <Link to="/about">About</Link>
-        </nav>
-      </header>
-      <Outlet />
-      <TanStackRouterDevtools />
-    </>
-  ),
-})
-```
+## Contributing
 
-The `<TanStackRouterDevtools />` component is not required so you can remove it if you don't want it in your layout.
-
-More information on layouts can be found in the [Layouts documentation](https://tanstack.com/router/latest/docs/framework/react/guide/routing-concepts#layouts).
-
-
-## Data Fetching
-
-There are multiple ways to fetch data in your application. You can use TanStack Query to fetch data from a server. But you can also use the `loader` functionality built into TanStack Router to load the data for a route before it's rendered.
-
-For example:
-
-```tsx
-const peopleRoute = createRoute({
-  getParentRoute: () => rootRoute,
-  path: "/people",
-  loader: async () => {
-    const response = await fetch("https://swapi.dev/api/people");
-    return response.json() as Promise<{
-      results: {
-        name: string;
-      }[];
-    }>;
-  },
-  component: () => {
-    const data = peopleRoute.useLoaderData();
-    return (
-      <ul>
-        {data.results.map((person) => (
-          <li key={person.name}>{person.name}</li>
-        ))}
-      </ul>
-    );
-  },
-});
-```
-
-Loaders simplify your data fetching logic dramatically. Check out more information in the [Loader documentation](https://tanstack.com/router/latest/docs/framework/react/guide/data-loading#loader-parameters).
-
-### React-Query
-
-React-Query is an excellent addition or alternative to route loading and integrating it into you application is a breeze.
-
-First add your dependencies:
-
-```bash
-npm install @tanstack/react-query @tanstack/react-query-devtools
-```
-
-Next we'll need to create a query client and provider. We recommend putting those in `main.tsx`.
-
-```tsx
-import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
-
-// ...
-
-const queryClient = new QueryClient();
-
-// ...
-
-if (!rootElement.innerHTML) {
-  const root = ReactDOM.createRoot(rootElement);
-
-  root.render(
-    <QueryClientProvider client={queryClient}>
-      <RouterProvider router={router} />
-    </QueryClientProvider>
-  );
-}
-```
-
-You can also add TanStack Query Devtools to the root route (optional).
-
-```tsx
-import { ReactQueryDevtools } from "@tanstack/react-query-devtools";
-
-const rootRoute = createRootRoute({
-  component: () => (
-    <>
-      <Outlet />
-      <ReactQueryDevtools buttonPosition="top-right" />
-      <TanStackRouterDevtools />
-    </>
-  ),
-});
-```
-
-Now you can use `useQuery` to fetch your data.
-
-```tsx
-import { useQuery } from "@tanstack/react-query";
-
-import "./App.css";
-
-function App() {
-  const { data } = useQuery({
-    queryKey: ["people"],
-    queryFn: () =>
-      fetch("https://swapi.dev/api/people")
-        .then((res) => res.json())
-        .then((data) => data.results as { name: string }[]),
-    initialData: [],
-  });
-
-  return (
-    <div>
-      <ul>
-        {data.map((person) => (
-          <li key={person.name}>{person.name}</li>
-        ))}
-      </ul>
-    </div>
-  );
-}
-
-export default App;
-```
-
-You can find out everything you need to know on how to use React-Query in the [React-Query documentation](https://tanstack.com/query/latest/docs/framework/react/overview).
-
-## State Management
-
-Another common requirement for React applications is state management. There are many options for state management in React. TanStack Store provides a great starting point for your project.
-
-First you need to add TanStack Store as a dependency:
-
-```bash
-npm install @tanstack/store
-```
-
-Now let's create a simple counter in the `src/App.tsx` file as a demonstration.
-
-```tsx
-import { useStore } from "@tanstack/react-store";
-import { Store } from "@tanstack/store";
-import "./App.css";
-
-const countStore = new Store(0);
-
-function App() {
-  const count = useStore(countStore);
-  return (
-    <div>
-      <button onClick={() => countStore.setState((n) => n + 1)}>
-        Increment - {count}
-      </button>
-    </div>
-  );
-}
-
-export default App;
-```
-
-One of the many nice features of TanStack Store is the ability to derive state from other state. That derived state will update when the base state updates.
-
-Let's check this out by doubling the count using derived state.
-
-```tsx
-import { useStore } from "@tanstack/react-store";
-import { Store, Derived } from "@tanstack/store";
-import "./App.css";
-
-const countStore = new Store(0);
-
-const doubledStore = new Derived({
-  fn: () => countStore.state * 2,
-  deps: [countStore],
-});
-doubledStore.mount();
-
-function App() {
-  const count = useStore(countStore);
-  const doubledCount = useStore(doubledStore);
-
-  return (
-    <div>
-      <button onClick={() => countStore.setState((n) => n + 1)}>
-        Increment - {count}
-      </button>
-      <div>Doubled - {doubledCount}</div>
-    </div>
-  );
-}
-
-export default App;
-```
-
-We use the `Derived` class to create a new store that is derived from another store. The `Derived` class has a `mount` method that will start the derived store updating.
-
-Once we've created the derived store we can use it in the `App` component just like we would any other store using the `useStore` hook.
-
-You can find out everything you need to know on how to use TanStack Store in the [TanStack Store documentation](https://tanstack.com/store/latest).
-
-# Demo files
-
-Files prefixed with `demo` can be safely deleted. They are there to provide a starting point for you to play around with the features you've installed.
-
-# Learn More
-
-You can learn more about all of the offerings from TanStack in the [TanStack documentation](https://tanstack.com).
+[Add contribution guidelines if applicable]
