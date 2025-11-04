@@ -1,41 +1,21 @@
-import { useEffect, useState, type PropsWithChildren } from 'react'
+import { type PropsWithChildren } from 'react'
 
-import { initAnonymousAuth, observeAuth } from '../firebaseClient'
+import { useAuth } from '../hooks/useAuth'
 import { useOfflineStatus } from '../hooks/useOfflineStatus'
 import OfflineToast from './OfflineToast'
+import AppHeader from './layout/AppHeader'
+import AppFooter from './layout/AppFooter'
 
 export default function AppLayout({ children }: PropsWithChildren) {
-  const [authError, setAuthError] = useState<string | null>(null)
-  const [userId, setUserId] = useState<string | null>(null)
+  const { userId, error: authError } = useAuth()
   const isOnline = useOfflineStatus()
 
-  useEffect(() => {
-    let unsubscribe: (() => void) | undefined
-
-    initAnonymousAuth()
-      .then(({ user }) => {
-        setUserId(user.uid)
-        unsubscribe = observeAuth(setUserId)
-      })
-      .catch((error: unknown) => {
-        const message =
-          error instanceof Error ? error.message : 'Unexpected authentication error'
-        setAuthError(message)
-      })
-
-    return () => {
-      unsubscribe?.()
-    }
-  }, [])
+  const appName = import.meta.env.VITE_APP_NAME || 'Resident Rendezvous'
+  const appDescription = import.meta.env.VITE_APP_DESCRIPTION || 'Coordinate family visits with ease'
 
   return (
     <div className="app-layout">
-      <header className="bg-primary text-white py-5">
-        <div className="container text-center">
-          <h1 className="display-4 fw-bold mb-2">{ import.meta.env.VITE_APP_NAME || 'Resident Rendezvous' }</h1>
-          <p className="lead mb-0">{ import.meta.env.VITE_APP_DESCRIPTION || 'Coordinate family visits with ease' }</p>
-        </div>
-      </header>
+      <AppHeader title={appName} description={appDescription} />
 
       <main className="py-5">
         <div className="container">
@@ -50,17 +30,7 @@ export default function AppLayout({ children }: PropsWithChildren) {
         </div>
       </main>
 
-      <footer className="footer bg-dark py-3 mt-auto">
-        <div className="container text-center">
-          {userId ? (
-            <p className="mb-0 small text-white-50">
-              Jouw bezoeker ID: <span className="text-white fw-semibold">{userId}</span>
-            </p>
-          ) : (
-            <p className="mb-0 small text-white-50">Verbinden...</p>
-          )}
-        </div>
-      </footer>
+      <AppFooter userId={userId} />
 
       <OfflineToast isOffline={!isOnline} />
     </div>

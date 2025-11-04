@@ -481,7 +481,7 @@ header.bg-primary .lead {
 .daily-agenda {
   background: white;
   border-radius: var(--radius-xl);
-  padding: 1rem;
+  padding: 2rem;
   box-shadow: var(--shadow-lg);
   border: 1px solid var(--gray-200);
 }

@@ -2,6 +2,7 @@ import { Edit2, Trash2, Clock, User, Calendar, MessageSquare } from 'lucide-reac
 
 import type { Visit } from '@/types/visit'
 import { sanitizeText } from '@/utils/sanitize'
+import { calculateDepartureTime, formatDuration } from '@/utils/timeUtils'
 
 interface VisitCardProps {
   visit: Visit
@@ -9,33 +10,6 @@ interface VisitCardProps {
   isDeleting: boolean
   onEdit: (visit: Visit) => void
   onDelete: (visit: Visit) => void
-}
-
-const summarizeDuration = (minutes: number) => {
-  if (minutes < 60) {
-    return `${minutes} ${minutes === 1 ? 'minuut' : 'minuten'}`
-  }
-
-  const hours = Math.floor(minutes / 60)
-  const remainingMinutes = minutes % 60
-
-  if (remainingMinutes === 0) {
-    return `${hours} ${hours === 1 ? 'uur' : 'uren'}`
-  }
-
-  return `${hours} uur en ${remainingMinutes} minuten`
-}
-
-const calculateDepartureTime = (arrivalTime: string, durationMinutes: number): string => {
-  const [hours, minutes] = arrivalTime.split(':').map(Number)
-  const arrivalDate = new Date()
-  arrivalDate.setHours(hours, minutes, 0, 0)
-  
-  const departureDate = new Date(arrivalDate.getTime() + durationMinutes * 60000)
-  const departureHours = departureDate.getHours().toString().padStart(2, '0')
-  const departureMinutes = departureDate.getMinutes().toString().padStart(2, '0')
-  
-  return `${departureHours}:${departureMinutes}`
 }
 
 export default function VisitCard({
@@ -46,7 +20,7 @@ export default function VisitCard({
   onDelete,
 }: VisitCardProps) {
   const departureTime = calculateDepartureTime(visit.time, visit.durationMinutes)
-  const durationText = summarizeDuration(visit.durationMinutes)
+  const durationText = formatDuration(visit.durationMinutes)
 
   return (
     <article
