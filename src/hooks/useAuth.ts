@@ -1,6 +1,7 @@
 import { useEffect, useState } from "react";
 import { initAnonymousAuth, observeAuth, signOut, getCurrentUser } from "../firebaseClient";
 import { useUserRole } from "./useUserRole";
+import { initializeAnonymousAuth } from "../utils/authUtils";
 
 /**
  * Hook for managing authentication state.
@@ -16,54 +17,33 @@ export function useAuth() {
 	useEffect(() => {
 		let unsubscribe: (() => void) | undefined;
 
+		// Helper function to handle auth state changes
+		const handleAuthStateChange = (uid: string | null) => {
+			setUserId(uid);
+			if (uid) {
+				const user = getCurrentUser();
+				setIsAnonymous(user?.isAnonymous ?? true);
+			} else {
+				setIsAnonymous(true);
+				// If signed out, initialize anonymous auth
+				initializeAnonymousAuth(setUserId, setIsAnonymous).catch((err) => {
+					console.error("Failed to initialize anonymous auth after sign out", err);
+				});
+			}
+		};
+
 		// Check if user is already authenticated
 		const currentUser = getCurrentUser();
 		if (currentUser) {
 			setUserId(currentUser.uid);
 			setIsAnonymous(currentUser.isAnonymous);
 			// Set up auth state observer
-			unsubscribe = observeAuth((uid) => {
-				setUserId(uid);
-				if (uid) {
-					const user = getCurrentUser();
-					setIsAnonymous(user?.isAnonymous ?? true);
-				} else {
-					setIsAnonymous(true);
-					// If signed out, initialize anonymous auth
-					initAnonymousAuth()
-						.then(({ user }) => {
-							setUserId(user.uid);
-							setIsAnonymous(user.isAnonymous);
-						})
-						.catch((err) => {
-							console.error("Failed to initialize anonymous auth after sign out", err);
-						});
-				}
-			});
+			unsubscribe = observeAuth(handleAuthStateChange);
 		} else {
 			// Initialize anonymous auth if no user is authenticated
-			initAnonymousAuth()
-				.then(({ user }) => {
-					setUserId(user.uid);
-					setIsAnonymous(user.isAnonymous);
-					unsubscribe = observeAuth((uid) => {
-						setUserId(uid);
-						if (uid) {
-							const user = getCurrentUser();
-							setIsAnonymous(user?.isAnonymous ?? true);
-						} else {
-							setIsAnonymous(true);
-							// If signed out, initialize anonymous auth
-							initAnonymousAuth()
-								.then(({ user }) => {
-									setUserId(user.uid);
-									setIsAnonymous(user.isAnonymous);
-								})
-								.catch((err) => {
-									console.error("Failed to initialize anonymous auth after sign out", err);
-								});
-						}
-					});
+			initializeAnonymousAuth(setUserId, setIsAnonymous)
+				.then(() => {
+					unsubscribe = observeAuth(handleAuthStateChange);
 				})
 				.catch((error: unknown) => {
 					const message =
@@ -83,9 +63,7 @@ export function useAuth() {
 		try {
 			await signOut();
 			// After sign out, re-initialize anonymous auth
-			const { user } = await initAnonymousAuth();
-			setUserId(user.uid);
-			setIsAnonymous(user.isAnonymous);
+			await initializeAnonymousAuth(setUserId, setIsAnonymous);
 		} catch (err) {
 			console.error("Failed to sign out", err);
 		}

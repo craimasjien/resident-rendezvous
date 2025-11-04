@@ -4,6 +4,7 @@ import { onSnapshot, query, where } from "firebase/firestore";
 import { getVisitsCollection } from "@/firebase/visitsCollection";
 import { useCurrentUserId } from "@/hooks/useCurrentUserId";
 import type { Visit } from "@/types/visit";
+import { sortVisitsByDateAndTime } from "@/utils/visitUtils";
 
 interface UseVisitsResult {
 	visits: Visit[];
@@ -50,15 +51,9 @@ export function useVisits(): UseVisitsResult {
 				});
 
 				// Sort visits by date and time for consistent display
-				visitsList.sort((a, b) => {
-					const dateCompare = a.date.localeCompare(b.date);
-					if (dateCompare !== 0) {
-						return dateCompare;
-					}
-					return a.time.localeCompare(b.time);
-				});
+				const sortedVisits = sortVisitsByDateAndTime(visitsList);
 
-				setVisits(visitsList);
+				setVisits(sortedVisits);
 				setIsLoading(false);
 				setError(null);
 			},

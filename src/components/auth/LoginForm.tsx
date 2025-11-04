@@ -1,6 +1,8 @@
 import { useState } from "react";
 import { useNavigate } from "@tanstack/react-router";
 import { signInWithEmail, signInWithGoogle } from "@/firebaseClient";
+import LoadingSpinner from "@/components/ui/LoadingSpinner";
+import ErrorAlert from "@/components/ui/ErrorAlert";
 
 export default function LoginForm() {
 	const [email, setEmail] = useState("");
@@ -58,11 +60,7 @@ export default function LoginForm() {
 				>
 					<h2 className="h4 mb-4">Beheerder Login</h2>
 
-					{error && (
-						<div className="alert alert-danger mb-4" role="alert">
-							{error}
-						</div>
-					)}
+					{error && <ErrorAlert message={error} />}
 
 					<form onSubmit={handleSubmit}>
 						<div className="mb-3">
@@ -104,13 +102,7 @@ export default function LoginForm() {
 							className={`btn btn-primary w-100 ${isSubmitting ? "disabled" : ""}`}
 							disabled={isSubmitting}
 						>
-							{isSubmitting && (
-								<span
-									className="spinner-border spinner-border-sm me-2"
-									role="status"
-									aria-hidden="true"
-								></span>
-							)}
+							{isSubmitting && <LoadingSpinner />}
 							Inloggen
 						</button>
 					</form>
@@ -134,13 +126,7 @@ export default function LoginForm() {
 								gap: "0.5rem",
 							}}
 						>
-							{isSubmitting && (
-								<span
-									className="spinner-border spinner-border-sm"
-									role="status"
-									aria-hidden="true"
-								></span>
-							)}
+							{isSubmitting && <LoadingSpinner />}
 							<svg
 								width="18"
 								height="18"

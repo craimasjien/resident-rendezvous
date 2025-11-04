@@ -5,27 +5,16 @@ import { Calendar, Clock, User } from 'lucide-react'
 import { useVisits } from '@/hooks/useVisits'
 import type { Visit } from '@/types/visit'
 import EmptyVisitsState from '@/components/visits/EmptyVisitsState'
+import ErrorAlert from '@/components/ui/ErrorAlert'
+import { formatDateLong } from '@/utils/dateFormatting'
+import { sortVisitsByDateAndTime } from '@/utils/visitUtils'
 
 export const Route = createFileRoute('/upcoming-visits')({
 	component: UpcomingVisitsRoute,
 })
 
-const dayFormatter = new Intl.DateTimeFormat('nl', {
-	weekday: 'long',
-	month: 'long',
-	day: 'numeric',
-})
-
 function UpcomingVisitsRoute() {
 	const { visits, isLoading, error } = useVisits()
-
-	const formatDate = (dateStr: string) => {
-		const parsedDate = new Date(`${dateStr}T00:00:00`)
-		if (Number.isNaN(parsedDate.getTime())) {
-			return dateStr
-		}
-		return dayFormatter.format(parsedDate)
-	}
 
 	// Group visits by date
 	const visitsByDate = useMemo(() => {
@@ -45,9 +34,9 @@ function UpcomingVisitsRoute() {
 		
 		sortedDates.forEach(date => {
 			const dayVisits = grouped.get(date)!
-			// Sort visits by time within each day
-			dayVisits.sort((a, b) => a.time.localeCompare(b.time))
-			result.push({ date, visits: dayVisits })
+			// Sort visits by time within each day (visits are already sorted from useVisits)
+			const sortedDayVisits = sortVisitsByDateAndTime(dayVisits)
+			result.push({ date, visits: sortedDayVisits })
 		})
 
 		return result
@@ -74,9 +63,9 @@ function UpcomingVisitsRoute() {
 				</section>
 
 				{error && (
-					<div className="alert alert-danger mb-4" role="alert">
-						<strong>Het laden van de bezoeken is mislukt:</strong> {error.message}
-					</div>
+					<ErrorAlert
+						message={`Het laden van de bezoeken is mislukt: ${error.message}`}
+					/>
 				)}
 
 				{!isLoading && !error && visits.length === 0 && (
@@ -105,7 +94,7 @@ function UpcomingVisitsRoute() {
 											fontSize: '1rem',
 											color: 'var(--gray-900)'
 										}}>
-											{formatDate(date)}
+											{formatDateLong(date)}
 										</span>
 									</div>
 								</div>
