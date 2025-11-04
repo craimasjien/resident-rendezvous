@@ -3,6 +3,7 @@ import { Edit2, Trash2, Clock, User, Calendar, MessageSquare } from 'lucide-reac
 import type { Visit } from '@/types/visit'
 import { sanitizeText } from '@/utils/sanitize'
 import { calculateDepartureTime, formatDuration } from '@/utils/timeUtils'
+import IconContainer from '@/components/ui/IconContainer'
 
 interface VisitCardProps {
   visit: Visit
@@ -30,17 +31,9 @@ export default function VisitCard({
         <div className="d-flex visit-card-mobile-layout justify-content-between align-items-start mb-4">
           <div className="flex-grow-1" style={{ width: '100%' }}>
             <div className="d-flex align-items-center mb-4">
-              <div className="d-flex align-items-center justify-content-center" style={{
-                width: '40px',
-                height: '40px',
-                borderRadius: '50%',
-                background: 'var(--gradient-primary)',
-                marginRight: '1rem',
-                flexShrink: 0,
-                boxShadow: 'var(--shadow-md)'
-              }}>
+              <IconContainer variant="primary" size={40} className="d-flex align-items-center justify-content-center">
                 <User size={20} className="text-white" />
-              </div>
+              </IconContainer>
               <h3 className="h4 mb-0">
                 {visit.visitorName}
               </h3>
@@ -48,75 +41,34 @@ export default function VisitCard({
 
             <div className="content">
               <div className="d-flex align-items-center visit-detail-item" style={{ flexWrap: 'wrap', gap: '0.5rem' }}>
-                <div style={{ 
-                  width: '32px',
-                  height: '32px',
-                  borderRadius: '8px',
-                  background: 'var(--gray-100)',
-                  display: 'flex',
-                  alignItems: 'center',
-                  justifyContent: 'center',
-                  marginRight: '0.75rem',
-                  flexShrink: 0
-                }}>
+                <IconContainer>
                   <Clock size={16} className="text-secondary" />
-                </div>
+                </IconContainer>
                 <span className="fw-semibold">Geplande aankomst:</span>
                 <span style={{ color: 'var(--gray-700)' }}>{visit.time}</span>
               </div>
 
               <div className="d-flex align-items-center visit-detail-item" style={{ flexWrap: 'wrap', gap: '0.5rem' }}>
-                <div style={{ 
-                  width: '32px',
-                  height: '32px',
-                  borderRadius: '8px',
-                  background: 'var(--gray-100)',
-                  display: 'flex',
-                  alignItems: 'center',
-                  justifyContent: 'center',
-                  marginRight: '0.75rem',
-                  flexShrink: 0
-                }}>
+                <IconContainer>
                   <Clock size={16} className="text-secondary" />
-                </div>
+                </IconContainer>
                 <span className="fw-semibold">Gepland vertrek:</span>
                 <span style={{ color: 'var(--gray-700)' }}>{departureTime}</span>
               </div>
 
               <div className="d-flex align-items-center visit-detail-item" style={{ flexWrap: 'wrap', gap: '0.5rem' }}>
-                <div style={{ 
-                  width: '32px',
-                  height: '32px',
-                  borderRadius: '8px',
-                  background: 'var(--gray-100)',
-                  display: 'flex',
-                  alignItems: 'center',
-                  justifyContent: 'center',
-                  marginRight: '0.75rem',
-                  flexShrink: 0
-                }}>
+                <IconContainer>
                   <Calendar size={16} className="text-secondary" />
-                </div>
+                </IconContainer>
                 <span className="fw-semibold">Duur van bezoek:</span>
                 <span style={{ color: 'var(--gray-700)' }}>{durationText}</span>
               </div>
 
               {visit.description && (
                 <div className="d-flex align-items-start mt-4" style={{ gap: '0.5rem' }}>
-                  <div style={{ 
-                    width: '32px',
-                    height: '32px',
-                    borderRadius: '8px',
-                    background: 'var(--gray-100)',
-                    display: 'flex',
-                    alignItems: 'center',
-                    justifyContent: 'center',
-                    marginRight: '0.75rem',
-                    marginTop: '0.25rem',
-                    flexShrink: 0
-                  }}>
+                  <IconContainer style={{ marginTop: '0.25rem' }}>
                     <MessageSquare size={16} className="text-secondary" />
-                  </div>
+                  </IconContainer>
                   <div style={{ flex: 1 }}>
                     <span className="fw-semibold">Opmerkingen:</span>
                     <p style={{ 
