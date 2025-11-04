@@ -1,4 +1,5 @@
 import type {
+	DocumentData,
 	FirestoreDataConverter,
 	QueryDocumentSnapshot,
 	SnapshotOptions,
@@ -10,9 +11,9 @@ import type {
  * of converting between Firestore documents and application types.
  * 
  * @template T - The application type (with id field)
- * @template TWrite - The write type (without id field)
+ * @template TWrite - The write type (without id field, must extend DocumentData)
  */
-export function createConverter<T extends { id: string }, TWrite>(
+export function createConverter<T extends { id: string }, TWrite extends DocumentData>(
 ): FirestoreDataConverter<T, TWrite> {
 	return {
 		toFirestore(data: T): WithFieldValue<TWrite> {
@@ -27,7 +28,7 @@ export function createConverter<T extends { id: string }, TWrite>(
 			return {
 				id: snapshot.id,
 				...data,
-			} as T;
+			} as unknown as T;
 		},
 	};
 }

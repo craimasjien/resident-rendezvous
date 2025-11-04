@@ -8,39 +8,41 @@ interface AppHeaderProps {
 
 export default function AppHeader({ title, description }: AppHeaderProps) {
 	const { isAdmin, signOut } = useAuth();
+	const hideLoginNavigation = import.meta.env.VITE_HIDE_LOGIN === "true";
 
 	return (
 		<header className="bg-primary text-white py-5">
 			<div className="container">
-				{/* Navigation bar */}
-				<nav className="d-flex justify-content-end mb-3">
-					{isAdmin ? (
-						<>
+				{!hideLoginNavigation && (
+					<nav className="d-flex justify-content-end mb-3">
+						{isAdmin ? (
+							<>
+								<Link
+									to="/dashboard"
+									className="btn btn-outline-light me-2"
+									style={{ textDecoration: "none" }}
+								>
+									Dashboard
+								</Link>
+								<button
+									type="button"
+									className="btn btn-outline-light"
+									onClick={signOut}
+								>
+									Uitloggen
+								</button>
+							</>
+						) : (
 							<Link
-								to="/dashboard"
-								className="btn btn-outline-light me-2"
+								to="/login"
+								className="btn btn-outline-light"
 								style={{ textDecoration: "none" }}
 							>
-								Dashboard
+								Beheerder Login
 							</Link>
-							<button
-								type="button"
-								className="btn btn-outline-light"
-								onClick={signOut}
-							>
-								Uitloggen
-							</button>
-						</>
-					) : (
-						<Link
-							to="/login"
-							className="btn btn-outline-light"
-							style={{ textDecoration: "none" }}
-						>
-							Beheerder Login
-						</Link>
-					)}
-				</nav>
+						)}
+					</nav>
+				)}
 
 				{/* Title and description */}
 				<div className="text-center">

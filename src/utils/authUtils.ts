@@ -1,4 +1,4 @@
-import { initAnonymousAuth, getCurrentUser } from "../firebaseClient";
+import { initAnonymousAuth } from "../firebaseClient";
 
 /**
  * Helper function to initialize anonymous auth and update state

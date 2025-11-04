@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import { initAnonymousAuth, observeAuth, signOut, getCurrentUser } from "../firebaseClient";
+import { observeAuth, signOut, getCurrentUser } from "../firebaseClient";
 import { useUserRole } from "./useUserRole";
 import { initializeAnonymousAuth } from "../utils/authUtils";
 
