@@ -181,19 +181,9 @@ export default function VisitCalendar({
 
 	return (
 		<div className="visit-calendar">
-			<header className="mb-5" style={{ marginBottom: "2.5rem" }}>
-				<h2 className="h5" style={{ marginBottom: "1rem" }}>
-					Selecteer een dag
-				</h2>
-				<p
-					className="text-muted mb-0"
-					style={{
-						marginBottom: "0",
-						lineHeight: "1.7",
-						minHeight: "3rem",
-						paddingBottom: "0.5rem",
-					}}
-				>
+			<header className="calendar-header-section">
+				<h2 className="calendar-title">Selecteer een dag</h2>
+				<p className="calendar-description">
 					De agenda wordt direct bijgewerkt wanneer je bladert.
 				</p>
 			</header>
