@@ -77,5 +77,6 @@ export function useAuth() {
 		isRoleLoading,
 		isAnonymous,
 		signOut: handleSignOut,
+		role,
 	};
 }

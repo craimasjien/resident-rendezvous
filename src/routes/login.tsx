@@ -1,5 +1,5 @@
-import { useEffect } from "react";
-import { createFileRoute, useNavigate } from "@tanstack/react-router";
+import { useEffect, useRef } from "react";
+import { createFileRoute, useNavigate, useLocation } from "@tanstack/react-router";
 import LoginForm from "@/components/auth/LoginForm";
 import { useAuth } from "@/hooks/useAuth";
 
@@ -8,15 +8,43 @@ export const Route = createFileRoute("/login")({
 });
 
 function LoginRoute() {
-	const { isAdmin, isAuthenticating, isRoleLoading } = useAuth();
+	const { isAuthenticating, isRoleLoading, userId, role } = useAuth();
 	const navigate = useNavigate();
+	const location = useLocation();
+	const redirectTimeoutRef = useRef<number | null>(null);
 
 	useEffect(() => {
-		// Only redirect if we've finished loading auth state AND role check, and user is admin
-		if (!isAuthenticating && !isRoleLoading && isAdmin) {
-			navigate({ to: "/dashboard" });
+		// Clear any pending redirect
+		if (redirectTimeoutRef.current) {
+			clearTimeout(redirectTimeoutRef.current);
+			redirectTimeoutRef.current = null;
 		}
-	}, [isAdmin, isAuthenticating, isRoleLoading, navigate]);
+
+		// Only redirect if:
+		// 1. We have a userId (user is authenticated)
+		// 2. We've finished loading auth state AND role check
+		// 3. Role is loaded (not null) and user is admin
+		// 4. We're still on the login page
+		if (
+			userId &&
+			!isAuthenticating &&
+			!isRoleLoading &&
+			role !== null &&
+			role === "administrator" &&
+			location.pathname === "/login"
+		) {
+			// Use a small timeout to debounce and prevent rapid redirects
+			redirectTimeoutRef.current = window.setTimeout(() => {
+				navigate({ to: "/dashboard", replace: true });
+			}, 100);
+		}
+
+		return () => {
+			if (redirectTimeoutRef.current) {
+				clearTimeout(redirectTimeoutRef.current);
+			}
+		};
+	}, [userId, role, isAuthenticating, isRoleLoading, navigate, location.pathname]);
 
 	if (isAuthenticating || isRoleLoading) {
 		return (

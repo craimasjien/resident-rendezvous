@@ -1,5 +1,4 @@
 import { useState } from "react";
-import { useNavigate } from "@tanstack/react-router";
 import { signInWithEmail, signInWithGoogle } from "@/firebaseClient";
 import LoadingSpinner from "@/components/ui/LoadingSpinner";
 import ErrorAlert from "@/components/ui/ErrorAlert";
@@ -9,7 +8,6 @@ export default function LoginForm() {
 	const [password, setPassword] = useState("");
 	const [error, setError] = useState<string | null>(null);
 	const [isSubmitting, setIsSubmitting] = useState(false);
-	const navigate = useNavigate();
 
 	const handleSubmit = async (e: React.FormEvent) => {
 		e.preventDefault();
@@ -18,9 +16,10 @@ export default function LoginForm() {
 
 		try {
 			await signInWithEmail(email, password);
-			// Navigate immediately - auth state should be updated by Firebase
-			// The dashboard route will handle admin verification via useRequireAdmin
-			navigate({ to: "/dashboard" });
+			// Don't navigate immediately - let the auth state observer update
+			// The login route will handle redirecting to dashboard once auth state is confirmed
+			// This prevents race conditions where navigation happens before auth state propagates
+			setIsSubmitting(false);
 		} catch (err) {
 			const errorMessage =
 				err instanceof Error ? err.message : "Inloggen mislukt";
@@ -35,9 +34,10 @@ export default function LoginForm() {
 
 		try {
 			await signInWithGoogle();
-			// Navigate immediately - auth state should be updated by Firebase
-			// The dashboard route will handle admin verification via useRequireAdmin
-			navigate({ to: "/dashboard" });
+			// Don't navigate immediately - let the auth state observer update
+			// The login route will handle redirecting to dashboard once auth state is confirmed
+			// This prevents race conditions where navigation happens before auth state propagates
+			setIsSubmitting(false);
 		} catch (err) {
 			const errorMessage =
 				err instanceof Error ? err.message : "Google inloggen mislukt";
