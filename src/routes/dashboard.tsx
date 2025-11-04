@@ -7,7 +7,7 @@ export const Route = createFileRoute("/dashboard")({
 });
 
 function DashboardRoute() {
-	const { isAdmin, isAuthenticating } = useRequireAdmin();
+	const { isAuthenticating } = useRequireAdmin();
 
 	// Show loading state while authenticating or if admin status is not yet confirmed
 	// Only show dashboard if we're done loading AND user is confirmed admin

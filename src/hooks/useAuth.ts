@@ -9,7 +9,7 @@ import { initializeAnonymousAuth } from "../utils/authUtils";
  */
 export function useAuth() {
 	const [userId, setUserId] = useState<string | null>(null);
-	const [error, setError] = useState<string | null>(null);
+	const [error] = useState<string | null>(null);
 	const [isAnonymous, setIsAnonymous] = useState<boolean>(true);
 
 	const { role, isLoading: isRoleLoading } = useUserRole(userId);

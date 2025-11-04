@@ -1,4 +1,4 @@
-import { type PropsWithChildren } from 'react'
+import type { PropsWithChildren } from 'react'
 
 import { useAuth } from '../hooks/useAuth'
 import { useOfflineStatus } from '../hooks/useOfflineStatus'
