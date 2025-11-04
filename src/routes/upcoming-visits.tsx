@@ -1,10 +1,10 @@
 import { useMemo } from 'react'
-import React from 'react'
 import { createFileRoute } from '@tanstack/react-router'
 import { Calendar, Clock, User } from 'lucide-react'
 
 import { useVisits } from '@/hooks/useVisits'
 import type { Visit } from '@/types/visit'
+import EmptyVisitsState from '@/components/visits/EmptyVisitsState'
 
 export const Route = createFileRoute('/upcoming-visits')({
 	component: UpcomingVisitsRoute,
@@ -15,18 +15,6 @@ const dayFormatter = new Intl.DateTimeFormat('nl', {
 	month: 'long',
 	day: 'numeric',
 })
-
-const calculateDepartureTime = (arrivalTime: string, durationMinutes: number): string => {
-	const [hours, minutes] = arrivalTime.split(':').map(Number)
-	const arrivalDate = new Date()
-	arrivalDate.setHours(hours, minutes, 0, 0)
-	
-	const departureDate = new Date(arrivalDate.getTime() + durationMinutes * 60000)
-	const departureHours = departureDate.getHours().toString().padStart(2, '0')
-	const departureMinutes = departureDate.getMinutes().toString().padStart(2, '0')
-	
-	return `${departureHours}:${departureMinutes}`
-}
 
 function UpcomingVisitsRoute() {
 	const { visits, isLoading, error } = useVisits()
@@ -92,100 +80,92 @@ function UpcomingVisitsRoute() {
 				)}
 
 				{!isLoading && !error && visits.length === 0 && (
-					<div className="alert alert-light" role="status" style={{
-						textAlign: 'center',
-						padding: '3rem 2rem',
-						background: 'linear-gradient(135deg, rgba(99, 102, 241, 0.05) 0%, rgba(139, 92, 246, 0.05) 100%)',
-						border: '2px dashed var(--gray-300)',
-						borderRadius: 'var(--radius-xl)'
-					}}>
-						<p style={{ 
-							fontSize: '1.125rem',
-							color: 'var(--gray-700)',
-							margin: 0,
-							fontWeight: '500'
-						}}>
-							Er zijn nog geen komende bezoeken gepland. Wees de eerste die langskomt! 🎉
-						</p>
-					</div>
+					<EmptyVisitsState isLoading={isLoading} error={error} />
 				)}
 
 				{!isLoading && !error && visits.length > 0 && (
-					<div className="table-responsive" style={{
-						background: 'white',
-						borderRadius: 'var(--radius-lg)',
-						boxShadow: 'var(--shadow-md)',
-						border: '1px solid var(--gray-200)'
-					}}>
-						<table className="table table-striped table-hover mb-0">
-							<thead>
-								<tr>
-									<th style={{ 
-										background: 'var(--gray-50)',
-										fontWeight: '600',
-										color: 'var(--gray-900)',
-										padding: '1rem'
-									}}>
-										<div className="d-flex align-items-center">
-											<Clock size={18} style={{ marginRight: '0.5rem' }} />
-											<span>Tijd</span>
-										</div>
-									</th>
-									<th style={{ 
-										background: 'var(--gray-50)',
-										fontWeight: '600',
-										color: 'var(--gray-900)',
-										padding: '1rem'
-									}}>
-										<div className="d-flex align-items-center">
-											<User size={18} style={{ marginRight: '0.5rem' }} />
-											<span>Bezoeker</span>
-										</div>
-									</th>
-								</tr>
-							</thead>
-							<tbody>
-								{visitsByDate.map(({ date, visits: dayVisits }) => (
-									<React.Fragment key={date}>
-										<tr style={{ 
-											background: 'var(--gray-100)',
-											borderTop: '2px solid var(--gray-300)'
+					<div style={{ display: 'flex', flexDirection: 'column', gap: '1.5rem' }}>
+						{visitsByDate.map(({ date, visits: dayVisits }) => (
+							<div key={date} style={{
+								background: 'white',
+								borderRadius: 'var(--radius-lg)',
+								boxShadow: 'var(--shadow-sm)',
+								border: '1px solid var(--gray-200)',
+								overflow: 'hidden'
+							}}>
+								<div style={{
+									padding: '0.75rem 1rem',
+									background: 'linear-gradient(135deg, rgba(99, 102, 241, 0.08) 0%, rgba(139, 92, 246, 0.08) 100%)',
+									borderBottom: '1px solid var(--gray-200)'
+								}}>
+									<div className="d-flex align-items-center">
+										<Calendar size={18} style={{ marginRight: '0.5rem', color: 'var(--primary)' }} />
+										<span style={{ 
+											fontWeight: '600',
+											fontSize: '1rem',
+											color: 'var(--gray-900)'
 										}}>
-											<td colSpan={2} style={{ 
-												padding: '1rem',
-												fontWeight: '600',
-												fontSize: '1.1rem',
-												color: 'var(--gray-900)'
-											}}>
-												<div className="d-flex align-items-center">
-													<Calendar size={20} style={{ marginRight: '0.75rem' }} />
-													<span>{formatDate(date)}</span>
+											{formatDate(date)}
+										</span>
+									</div>
+								</div>
+								<div style={{ padding: '0.5rem' }}>
+									{dayVisits.map(visit => (
+										<div
+											key={visit.id}
+											className="d-flex align-items-center justify-content-between"
+											style={{
+												padding: '0.75rem 1rem',
+												borderRadius: 'var(--radius-md)',
+												transition: 'background-color 0.2s'
+											}}
+											onMouseEnter={(e) => {
+												e.currentTarget.style.backgroundColor = 'var(--gray-50)'
+											}}
+											onMouseLeave={(e) => {
+												e.currentTarget.style.backgroundColor = 'transparent'
+											}}
+										>
+											<div className="d-flex align-items-center" style={{ flex: 1, minWidth: 0 }}>
+												<div style={{
+													width: '36px',
+													height: '36px',
+													borderRadius: '8px',
+													background: 'var(--gray-100)',
+													display: 'flex',
+													alignItems: 'center',
+													justifyContent: 'center',
+													marginRight: '0.75rem',
+													flexShrink: 0
+												}}>
+													<Clock size={16} className="text-secondary" />
 												</div>
-											</td>
-										</tr>
-										{dayVisits.map(visit => {
-											const departureTime = calculateDepartureTime(visit.time, visit.durationMinutes)
-
-											return (
-												<tr key={visit.id}>
-													<td style={{ padding: '1rem', verticalAlign: 'middle' }}>
-														<div>
-															<span className="fw-semibold">{visit.time}</span>
-															<span className="text-secondary" style={{ marginLeft: '0.5rem' }}>
-																- {departureTime}
-															</span>
-														</div>
-													</td>
-													<td style={{ padding: '1rem', verticalAlign: 'middle' }}>
-														<span className="fw-medium">{visit.visitorName}</span>
-													</td>
-												</tr>
-											)
-										})}
-									</React.Fragment>
-								))}
-							</tbody>
-						</table>
+												<span style={{ 
+													fontWeight: '600',
+													color: 'var(--gray-900)',
+													marginRight: '1rem',
+													minWidth: '60px',
+													flexShrink: 0
+												}}>
+													{visit.time}
+												</span>
+												<div className="d-flex align-items-center" style={{ flex: 1, minWidth: 0 }}>
+													<User size={16} style={{ marginRight: '0.5rem', color: 'var(--gray-500)', flexShrink: 0 }} />
+													<span style={{ 
+														color: 'var(--gray-700)',
+														overflow: 'hidden',
+														textOverflow: 'ellipsis',
+														whiteSpace: 'nowrap'
+													}}>
+														{visit.visitorName}
+													</span>
+												</div>
+											</div>
+										</div>
+									))}
+								</div>
+							</div>
+						))}
 					</div>
 				)}
 
