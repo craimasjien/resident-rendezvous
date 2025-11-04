@@ -67,6 +67,7 @@ jobs:
           VITE_FIREBASE_APP_ID: ${{ secrets.VITE_FIREBASE_APP_ID }}
           VITE_APP_NAME: ${{ vars.VITE_APP_NAME }}
           VITE_APP_DESCRIPTION: ${{ vars.VITE_APP_DESCRIPTION }}
+          VITE_HIDE_LOGIN: ${{ vars.VITE_HIDE_LOGIN }}
           VITE_BUILD_DATE: ${{ steps.build-info.outputs.build_date }}
           VITE_BUILD_COMMIT: ${{ steps.build-info.outputs.commit_short }}
           VITE_BUILD_COMMIT_FULL: ${{ steps.build-info.outputs.commit_full }}
