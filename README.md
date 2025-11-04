@@ -2,6 +2,8 @@
 
 A simple, friendly web application for coordinating family visits with a resident. Designed to help families schedule visits without calendar conflicts, logins, or confusing tooling.
 
+[![Test and Deploy](https://github.com/craimasjien/resident-rendezvous/actions/workflows/test-and-deploy.yml/badge.svg)](https://github.com/craimasjien/resident-rendezvous/actions/workflows/test-and-deploy.yml)
+
 ## Goal
 
 Enable quick visit scheduling from any device, even for non-technical family members, while ensuring everyone sees the same up-to-date agenda in real time. The app protects privacy while allowing lightweight collaboration through anonymous authentication.
