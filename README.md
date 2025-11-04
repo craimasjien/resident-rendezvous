@@ -190,11 +190,3 @@ The app uses Firestore listeners to automatically sync visit data across all con
 ### Offline Support
 
 When the network connection is lost, users see a notification toast. The app will automatically sync when connectivity is restored.
-
-## License
-
-[Add your license here]
-
-## Contributing
-
-[Add contribution guidelines if applicable]
