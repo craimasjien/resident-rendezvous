@@ -1,4 +1,4 @@
-import { Edit2, Trash2, Clock, User, Calendar, MessageSquare } from 'lucide-react'
+import { Edit2, Trash2, Clock, User, Calendar, MessageSquare, CheckCircle2 } from 'lucide-react'
 
 import type { Visit } from '@/types/visit'
 import { sanitizeText } from '@/utils/sanitize'
@@ -34,9 +34,21 @@ export default function VisitCard({
               <IconContainer variant="primary" size={40} className="d-flex align-items-center justify-content-center">
                 <User size={20} className="text-white" />
               </IconContainer>
-              <h3 className="h4 mb-0">
-                {visit.visitorName}
-              </h3>
+              <div className="d-flex align-items-center" style={{ gap: '0.5rem' }}>
+                <h3 className="h4 mb-0">
+                  {visit.visitorName}
+                </h3>
+                {visit.verified && (
+                  <span 
+                    className="badge bg-success d-flex align-items-center" 
+                    style={{ gap: '0.25rem', fontSize: '0.75rem' }}
+                    title="Geverifieerde gebruiker"
+                  >
+                    <CheckCircle2 size={14} />
+                    Geverifieerde gebruiker
+                  </span>
+                )}
+              </div>
             </div>
 
             <div className="content">

@@ -9,7 +9,7 @@ import { routeTree } from './routeTree.gen'
 
 import './styles.css'
 import reportWebVitals from './reportWebVitals.ts'
-import { getFirebaseApp, initAnonymousAuth } from './firebaseClient.ts'
+import { getFirebaseApp } from './firebaseClient.ts'
 
 // Create a new router instance
 
@@ -33,7 +33,8 @@ declare module '@tanstack/react-router' {
 }
 
 getFirebaseApp()
-void initAnonymousAuth()
+// Don't initialize anonymous auth here - let useAuth hook handle it
+// This prevents overwriting persisted sessions before Firebase restores them
 
 // Set the document title from environment variable
 document.title = import.meta.env.VITE_APP_NAME ?? 'Resident Rendezvous'

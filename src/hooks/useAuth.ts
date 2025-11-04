@@ -16,6 +16,7 @@ export function useAuth() {
 
 	useEffect(() => {
 		let unsubscribe: (() => void) | undefined;
+		let hasInitializedAnonymous = false;
 
 		// Helper function to handle auth state changes
 		const handleAuthStateChange = (uid: string | null) => {
@@ -23,36 +24,36 @@ export function useAuth() {
 			if (uid) {
 				const user = getCurrentUser();
 				setIsAnonymous(user?.isAnonymous ?? true);
+				// Reset flag if we get a real user (not anonymous)
+				if (user && !user.isAnonymous) {
+					hasInitializedAnonymous = false;
+				}
 			} else {
 				setIsAnonymous(true);
-				// If signed out, initialize anonymous auth
-				initializeAnonymousAuth(setUserId, setIsAnonymous).catch((err) => {
-					console.error("Failed to initialize anonymous auth after sign out", err);
-				});
+				// Only initialize anonymous auth if we haven't already done so
+				// This prevents overwriting a session that's being restored
+				if (!hasInitializedAnonymous) {
+					hasInitializedAnonymous = true;
+					initializeAnonymousAuth(setUserId, setIsAnonymous).catch((err) => {
+						console.error("Failed to initialize anonymous auth after sign out", err);
+						hasInitializedAnonymous = false;
+					});
+				}
 			}
 		};
 
-		// Check if user is already authenticated
-		const currentUser = getCurrentUser();
-		if (currentUser) {
-			setUserId(currentUser.uid);
-			setIsAnonymous(currentUser.isAnonymous);
-			// Set up auth state observer
-			unsubscribe = observeAuth(handleAuthStateChange);
-		} else {
-			// Initialize anonymous auth if no user is authenticated
-			initializeAnonymousAuth(setUserId, setIsAnonymous)
-				.then(() => {
-					unsubscribe = observeAuth(handleAuthStateChange);
-				})
-				.catch((error: unknown) => {
-					const message =
-						error instanceof Error
-							? error.message
-							: "Unexpected authentication error";
-					setError(message);
-				});
-		}
+		// Set up auth state observer first - Firebase's onAuthStateChanged fires
+		// synchronously with the current auth state (including restored sessions)
+		// This ensures we don't initialize anonymous auth before Firebase restores a session
+		unsubscribe = observeAuth((uid) => {
+			if (uid) {
+				// User exists (could be anonymous or authenticated)
+				handleAuthStateChange(uid);
+			} else {
+				// No user exists - initialize anonymous auth
+				handleAuthStateChange(null);
+			}
+		});
 
 		return () => {
 			unsubscribe?.();

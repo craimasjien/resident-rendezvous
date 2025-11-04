@@ -31,7 +31,7 @@ service cloud.firestore {
       // Helper functie voor toegestane velden (inclusief optionele)
       function hasOnlyAllowedFields() {
         let allowed = ['date', 'time', 'visitorName', 'description', 
-                       'durationMinutes', 'userId'];
+                       'durationMinutes', 'userId', 'verified'];
         return request.resource.data.keys().hasOnly(allowed);
       }
       
@@ -49,7 +49,10 @@ service cloud.firestore {
                       request.resource.data.durationMinutes is number &&
                       // description is optioneel - check alleen als het bestaat
                       (!request.resource.data.keys().hasAny(['description']) || 
-                       request.resource.data.description is string);
+                       request.resource.data.description is string) &&
+                      // verified is optioneel - check alleen als het bestaat
+                      (!request.resource.data.keys().hasAny(['verified']) || 
+                       request.resource.data.verified is bool);
       
       // Updaten: eigen data of admin kan alles updaten
       allow update: if request.auth != null &&

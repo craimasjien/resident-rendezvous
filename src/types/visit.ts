@@ -12,6 +12,7 @@ export interface Visit {
 	description?: string;
 	durationMinutes: number;
 	userId: string;
+	verified?: boolean;
 }
 
 export type VisitWriteData = Omit<Visit, "id">;
