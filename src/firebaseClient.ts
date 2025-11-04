@@ -1,5 +1,12 @@
 import { type FirebaseApp, initializeApp } from "firebase/app";
-import { getAuth, onAuthStateChanged, signInAnonymously } from "firebase/auth";
+import {
+	getAuth,
+	onAuthStateChanged,
+	signInAnonymously,
+	signInWithEmailAndPassword,
+	signOut as firebaseSignOut,
+	type User as FirebaseUser,
+} from "firebase/auth";
 
 const firebaseConfig = {
 	apiKey: import.meta.env.VITE_FIREBASE_API_KEY,
@@ -51,4 +58,42 @@ export const observeAuth = (callback: (userId: string | null) => void) => {
 	return onAuthStateChanged(auth, (user) => {
 		callback(user?.uid ?? null);
 	});
+};
+
+export const signInWithEmail = async (
+	email: string,
+	password: string,
+): Promise<FirebaseUser> => {
+	const app = getFirebaseApp();
+	const auth = getAuth(app);
+
+	try {
+		const userCredential = await signInWithEmailAndPassword(
+			auth,
+			email,
+			password,
+		);
+		return userCredential.user;
+	} catch (error) {
+		console.error("Failed to sign in with email", error);
+		throw error;
+	}
+};
+
+export const signOut = async (): Promise<void> => {
+	const app = getFirebaseApp();
+	const auth = getAuth(app);
+
+	try {
+		await firebaseSignOut(auth);
+	} catch (error) {
+		console.error("Failed to sign out", error);
+		throw error;
+	}
+};
+
+export const getCurrentUser = (): FirebaseUser | null => {
+	const app = getFirebaseApp();
+	const auth = getAuth(app);
+	return auth.currentUser;
 };

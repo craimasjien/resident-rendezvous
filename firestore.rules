@@ -3,6 +3,23 @@ rules_version = '2';
 service cloud.firestore {
   match /databases/{database}/documents {
   
+  // Helper functie om te controleren of een gebruiker een administrator is
+  function isAdministrator() {
+    return request.auth != null &&
+           exists(/databases/$(database)/documents/users/$(request.auth.uid)) &&
+           get(/databases/$(database)/documents/users/$(request.auth.uid)).data.role == 'administrator';
+  }
+  
+  // Users collection regels
+  match /users/{userId} {
+    // Lezen: gebruikers kunnen hun eigen document lezen, admins kunnen alle documenten lezen
+    allow read: if request.auth != null &&
+                (request.auth.uid == userId || isAdministrator());
+    
+    // Schrijven: alleen admins kunnen gebruikersdocumenten aanmaken of bijwerken
+    allow write: if isAdministrator();
+  }
+  
   match /visits/{visitId} {
       
       // Helper functie voor vereiste velden
@@ -18,14 +35,14 @@ service cloud.firestore {
         return request.resource.data.keys().hasOnly(allowed);
       }
       
-      // Lezen: iedereen die is ingelogd
+      // Lezen: iedereen die is ingelogd (admins kunnen alles lezen)
       allow read: if request.auth != null;
       
-      // Aanmaken: valideer data
+      // Aanmaken: valideer data (normale gebruikers kunnen alleen eigen bezoeken aanmaken, admins kunnen alles aanmaken)
       allow create: if request.auth != null &&
                       hasRequiredFields() &&
                       hasOnlyAllowedFields() &&
-                      request.resource.data.userId == request.auth.uid &&
+                      (request.resource.data.userId == request.auth.uid || isAdministrator()) &&
                       request.resource.data.date is string &&
                       request.resource.data.time is string &&
                       request.resource.data.visitorName is string &&
@@ -34,15 +51,15 @@ service cloud.firestore {
                       (!request.resource.data.keys().hasAny(['description']) || 
                        request.resource.data.description is string);
       
-      // Updaten: alleen eigen data
+      // Updaten: eigen data of admin kan alles updaten
       allow update: if request.auth != null &&
-                      resource.data.userId == request.auth.uid &&
+                      (resource.data.userId == request.auth.uid || isAdministrator()) &&
                       hasOnlyAllowedFields() &&
-                      request.resource.data.userId == request.auth.uid;
+                      (request.resource.data.userId == resource.data.userId || isAdministrator());
       
-      // Verwijderen: alleen eigen data
+      // Verwijderen: eigen data of admin kan alles verwijderen
       allow delete: if request.auth != null &&
-                      resource.data.userId == request.auth.uid;
+                      (resource.data.userId == request.auth.uid || isAdministrator());
     }
   
     match /{document=**} {
