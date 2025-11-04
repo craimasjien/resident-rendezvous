@@ -10,6 +10,10 @@ interface ImportMetaEnv {
   readonly VITE_FIREBASE_STORAGE_BUCKET: string | undefined
   readonly VITE_FIREBASE_MESSAGING_SENDER_ID: string | undefined
   readonly VITE_FIREBASE_MEASUREMENT_ID: string | undefined
+  readonly VITE_BUILD_DATE: string | undefined
+  readonly VITE_BUILD_COMMIT: string | undefined
+  readonly VITE_BUILD_COMMIT_FULL: string | undefined
+  readonly VITE_GITHUB_REPO_URL: string | undefined
 }
 
 interface ImportMeta {
