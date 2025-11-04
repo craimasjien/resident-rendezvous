@@ -77,6 +77,10 @@ export default function BookingModal({
 
 			if (isEditing && editingVisit) {
 				await updateDoc(doc(collectionRef, editingVisit.id), visitData);
+				// Call callback with the date when a visit is updated (especially if date changed)
+				if (onVisitCreated) {
+					onVisitCreated(formState.date);
+				}
 			} else {
 				await addDoc(collectionRef, visitData);
 				// Call callback with the date when a new visit is created
