@@ -140,6 +140,14 @@ export default function BookingModal({
 			return;
 		}
 
+		// Check ownership when editing
+		if (isEditing && editingVisit) {
+			if (editingVisit.userId !== userId) {
+				setGeneralError("Je kunt alleen je eigen bezoeken bewerken");
+				return;
+			}
+		}
+
 		// Check if the visit time conflicts with any blocked timeslot
 		for (const blockedTimeslot of blockedTimeslotsForDate) {
 			if (

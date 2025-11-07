@@ -52,6 +52,12 @@ export default function DailyAgenda({
 	);
 
 	const handleDeleteVisit = async (visit: Visit) => {
+		// Check ownership before allowing delete
+		if (currentUserId === null || visit.userId !== currentUserId) {
+			alert("Je kunt alleen je eigen bezoeken verwijderen");
+			return;
+		}
+
 		if (
 			!window.confirm(
 				`Weet je zeker dat je ${visit.visitorName}'s bezoek wilt verwijderen?`,
@@ -73,6 +79,11 @@ export default function DailyAgenda({
 	};
 
 	const handleEditVisit = (visit: Visit) => {
+		// Check ownership before allowing edit
+		if (currentUserId === null || visit.userId !== currentUserId) {
+			alert("Je kunt alleen je eigen bezoeken bewerken");
+			return;
+		}
 		editVisit(visit);
 	};
 

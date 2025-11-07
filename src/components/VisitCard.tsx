@@ -39,8 +39,8 @@ export default function VisitCard({
                   {visit.visitorName}
                 </h3>
                 {visit.verified && (
-                  <span 
-                    className="badge bg-success d-flex align-items-center" 
+                  <span
+                    className="badge bg-success d-flex align-items-center"
                     style={{ gap: '0.25rem', fontSize: '0.75rem' }}
                     title="Geverifieerde gebruiker"
                   >
@@ -83,7 +83,7 @@ export default function VisitCard({
                   </IconContainer>
                   <div style={{ flex: 1 }}>
                     <span className="fw-semibold">Opmerkingen:</span>
-                    <p style={{ 
+                    <p style={{
                       marginTop: '0.5rem',
                       padding: '0.75rem',
                       background: 'var(--gray-50)',
@@ -97,10 +97,10 @@ export default function VisitCard({
             </div>
           </div>
 
-          {/* {isOwner && ( */}
-            <div 
-              className="btn-group visit-card-buttons" 
-              style={{ 
+          {isOwner && (
+            <div
+              className="btn-group visit-card-buttons"
+              style={{
                 marginLeft: '1rem',
                 flexShrink: 0
               }}
@@ -112,7 +112,7 @@ export default function VisitCard({
                 aria-label={`Edit visit by ${visit.visitorName}`}
                 title="Edit visit"
                 disabled={isDeleting}
-                style={{ 
+                style={{
                   minWidth: '40px',
                   height: '40px',
                   display: 'flex',
@@ -129,7 +129,7 @@ export default function VisitCard({
                 aria-label={`Delete visit by ${visit.visitorName}`}
                 title="Delete visit"
                 disabled={isDeleting}
-                style={{ 
+                style={{
                   minWidth: '40px',
                   height: '40px',
                   display: 'flex',
@@ -140,7 +140,7 @@ export default function VisitCard({
                 <Trash2 size={18} />
               </button>
             </div>
-          {/* )} */}
+          )}
         </div>
       </div>
     </article>
