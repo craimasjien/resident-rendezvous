@@ -1,5 +1,7 @@
+import React from "react";
+
 interface ErrorAlertProps {
-	message: string;
+	message: string | React.ReactNode;
 	variant?: "danger" | "warning" | "info";
 	className?: string;
 }

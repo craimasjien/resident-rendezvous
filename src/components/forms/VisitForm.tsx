@@ -1,12 +1,14 @@
 import { useId } from "react";
 import type { VisitFormState } from "@/hooks/useVisitForm";
 import type { Visit } from "@/types/visit";
+import type { BlockedTimeslot } from "@/types/blockedTimeslot";
+import { calculateDepartureTime } from "@/utils/timeUtils";
 import LoadingSpinner from "@/components/ui/LoadingSpinner";
 import ErrorAlert from "@/components/ui/ErrorAlert";
 
 interface VisitFormProps {
 	formState: VisitFormState;
-	error: string | null;
+	error: string | React.ReactNode | null;
 	isSubmitting: boolean;
 	isEditing: boolean;
 	onChange: (field: keyof VisitFormState, value: string | number) => void;
@@ -14,6 +16,7 @@ interface VisitFormProps {
 	onCancel: () => void;
 	conflict: string | null;
 	sameDayVisits: Visit[] | null;
+	blockedTimeslots?: BlockedTimeslot[];
 }
 
 export default function VisitForm({
@@ -26,6 +29,7 @@ export default function VisitForm({
 	onSubmit,
 	onCancel,
 	conflict,
+	blockedTimeslots = [],
 }: VisitFormProps) {
 	const baseId = useId();
 	const visitorNameId = `${baseId}-visitor-name`;
@@ -37,19 +41,38 @@ export default function VisitForm({
 	return (
 		<form onSubmit={onSubmit}>
 			<div className="modal-body">
-				<div className="alert alert-info mb-4" role="alert">
+				<div className={`alert ${blockedTimeslots.length > 0 ? 'alert-danger' : 'alert-info'} mb-4`} role="alert">
 					<strong>Let op:</strong> Bezoeken kunnen alleen gepland worden tijdens
 					de volgende tijden:
 					<ul className="mb-0 mt-2">
 						<li><b>Maandag-vrijdag:</b> 09:00-12:00, 15:00-17:00 en 18:00-22:00</li>
 						<li><b>Zaterdag en zondag:</b> 09:00-22:00</li>
 					</ul>
+					{blockedTimeslots.length > 0 && (
+						<>
+							<br />
+							<strong>Geblokkeerde periodes op deze dag:</strong>
+							<ul className="mb-0 mt-2">
+								{blockedTimeslots.map((blocked) => {
+									const endTime = calculateDepartureTime(
+										blocked.time,
+										blocked.durationMinutes,
+									);
+									return (
+										<li key={blocked.id}>
+											{blocked.message} ({blocked.time} - {endTime})
+										</li>
+									);
+								})}
+							</ul>
+						</>
+					)}
 				</div>
 
 				{sameDayVisits && sameDayVisits.length > 0 && (
-				<div className="alert alert-warning mb-4" role="alert">
-					<strong>Let op:</strong> Er is al een bezoek gepland op deze dag. Overweeg of dit niet te veel is en kies bij voorkeur een andere dag.
-				</div>
+					<div className="alert alert-warning mb-4" role="alert">
+						<strong>Let op:</strong> Er is al een bezoek gepland op deze dag. Overweeg of dit niet te veel is en kies bij voorkeur een andere dag.
+					</div>
 				)}
 
 				{error && <ErrorAlert message={error} />}

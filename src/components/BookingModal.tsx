@@ -1,3 +1,5 @@
+import { useMemo, useEffect } from "react";
+import React from "react";
 import { addDoc, doc, updateDoc } from "firebase/firestore";
 import { createPortal } from "react-dom";
 
@@ -53,6 +55,82 @@ export default function BookingModal({
 		(blocked) => blocked.date === formState.date,
 	);
 
+	const conflict = getValidationError();
+
+	// Check for blocked timeslot conflicts in real-time
+	useEffect(() => {
+		if (isSubmitting || !formState.time || !formState.date) return;
+
+		const conflictingBlockedTimeslot = blockedTimeslotsForDate.find((blocked) =>
+			checkBlockedTimeslotConflict(
+				formState.date,
+				formState.time,
+				formState.durationMinutes,
+				blocked,
+			),
+		);
+
+		if (conflictingBlockedTimeslot) {
+			const endTime = calculateDepartureTime(
+				conflictingBlockedTimeslot.time,
+				conflictingBlockedTimeslot.durationMinutes,
+			);
+			setGeneralError(
+				<><strong>Je kunt geen bezoek plannen tijdens een geblokkeerde periode van ({conflictingBlockedTimeslot.time} - {endTime})</strong>. Kies een andere tijd.</>,
+			);
+		} else {
+			// No conflict with blocked timeslots - clear the blocked timeslot error if it exists
+			// Check if error is a React element (blocked timeslot error) or a string containing "geblokkeerde periode"
+			const isBlockedTimeslotError =
+				error &&
+				(React.isValidElement(error) ||
+					(typeof error === "string" && error.includes("geblokkeerde periode")));
+
+			if (isBlockedTimeslotError) {
+				// Clear the blocked timeslot error if the conflict is resolved
+				const validationError = getValidationError();
+				if (!validationError) {
+					setGeneralError(null);
+				} else {
+					// If there's another validation error, use that instead
+					setGeneralError(validationError);
+				}
+			}
+		}
+	}, [
+		formState.date,
+		formState.time,
+		formState.durationMinutes,
+		blockedTimeslotsForDate,
+		isSubmitting,
+		error,
+		getValidationError,
+		setGeneralError,
+	]);
+
+	// Combine conflict message with blocked timeslot info
+	const combinedError = useMemo(() => {
+		const parts: string[] = [];
+
+		if (conflict) {
+			parts.push(conflict);
+		}
+
+		// Always show all blocked timeslots for the day
+		if (blockedTimeslotsForDate.length > 0) {
+			const blockedParts = blockedTimeslotsForDate.map((blocked) => {
+				const endTime = calculateDepartureTime(
+					blocked.time,
+					blocked.durationMinutes,
+				);
+				return `${blocked.message} (${blocked.time} - ${endTime})`;
+			});
+			parts.push(`Geblokkeerde periodes: ${blockedParts.join(", ")}`);
+		}
+
+		return parts.length > 0 ? parts.join(" | ") : null;
+	}, [conflict, blockedTimeslotsForDate]);
+
 	const handleSubmit = async (e: React.FormEvent) => {
 		e.preventDefault();
 		setGeneralError(null);
@@ -94,9 +172,9 @@ export default function BookingModal({
 		try {
 			// Check if user authenticated with Google
 			const currentUser = getCurrentUser();
-			const isGoogleAuth = currentUser && !currentUser.isAnonymous && 
+			const isGoogleAuth = currentUser && !currentUser.isAnonymous &&
 				currentUser.providerData.some(provider => provider.providerId === 'google.com');
-			
+
 			const visitData: VisitWriteData = {
 				date: formState.date,
 				time: formState.time,
@@ -142,8 +220,6 @@ export default function BookingModal({
 
 	if (!isOpen) return null;
 
-	const conflict = getValidationError();
-
 	const modalContent = (
 		<div
 			className="modal show d-block"
@@ -188,8 +264,9 @@ export default function BookingModal({
 						onChange={updateField}
 						onSubmit={handleSubmit}
 						onCancel={onClose}
-						conflict={conflict}
+						conflict={combinedError || conflict}
 						sameDayVisits={sameDayVisits}
+						blockedTimeslots={blockedTimeslotsForDate}
 					/>
 				</div>
 			</div>
