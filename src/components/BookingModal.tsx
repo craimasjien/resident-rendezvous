@@ -7,9 +7,10 @@ import { useBlockedTimeslots } from "@/hooks/useBlockedTimeslots";
 import { useVisitForm } from "@/hooks/useVisitForm";
 import type { Visit, VisitWriteData } from "@/types/visit";
 import { sanitizeText } from "@/utils/sanitize";
+import { calculateDepartureTime } from "@/utils/timeUtils";
 import VisitForm from "./forms/VisitForm";
 import { useDailyVisits } from "@/hooks/useDailyVisits";
-import { checkSameDayVisit } from "@/utils/visitValidation";
+import { checkSameDayVisit, checkBlockedTimeslotConflict } from "@/utils/visitValidation";
 import { getCurrentUser } from "@/firebaseClient";
 
 interface BookingModalProps {
@@ -47,11 +48,8 @@ export default function BookingModal({
 		editingVisit?.id,
 	);
 
-	// Check if the selected date is blocked
-	const isDateBlocked = blockedTimeslots.some(
-		(blocked) => blocked.date === formState.date,
-	);
-	const blockedTimeslot = blockedTimeslots.find(
+	// Find blocked timeslots for the selected date
+	const blockedTimeslotsForDate = blockedTimeslots.filter(
 		(blocked) => blocked.date === formState.date,
 	);
 
@@ -64,12 +62,25 @@ export default function BookingModal({
 			return;
 		}
 
-		// Check if the date is blocked
-		if (isDateBlocked && blockedTimeslot) {
-			setGeneralError(
-				`Deze dag is geblokkeerd: ${blockedTimeslot.message}. Je kunt geen bezoek plannen op deze dag.`,
-			);
-			return;
+		// Check if the visit time conflicts with any blocked timeslot
+		for (const blockedTimeslot of blockedTimeslotsForDate) {
+			if (
+				checkBlockedTimeslotConflict(
+					formState.date,
+					formState.time,
+					formState.durationMinutes,
+					blockedTimeslot,
+				)
+			) {
+				const endTime = calculateDepartureTime(
+					blockedTimeslot.time,
+					blockedTimeslot.durationMinutes,
+				);
+				setGeneralError(
+					`Dit bezoek overlapt met een geblokkeerde periode: ${blockedTimeslot.message}. De kalender is niet beschikbaar van ${blockedTimeslot.time} tot ${endTime}. Kies een andere tijd.`,
+				);
+				return;
+			}
 		}
 
 		const conflict = getValidationError();

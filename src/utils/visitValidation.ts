@@ -103,6 +103,26 @@ export function checkSameDayVisit(
 }
 
 /**
+ * Checks if a visit conflicts with a blocked timeslot
+ */
+export function checkBlockedTimeslotConflict(
+	date: string,
+	time: string,
+	durationMinutes: number,
+	blockedTimeslot: { date: string; time: string; durationMinutes: number; message: string },
+): boolean {
+	if (blockedTimeslot.date !== date) return false;
+
+	const start1 = parseTime(time);
+	const end1 = start1 + durationMinutes;
+	const start2 = parseTime(blockedTimeslot.time);
+	const end2 = start2 + blockedTimeslot.durationMinutes;
+
+	// Check if time ranges overlap
+	return start1 < end2 && start2 < end1;
+}
+
+/**
  * Validates a visit and returns an error message if invalid, or null if valid
  */
 export function validateVisit(

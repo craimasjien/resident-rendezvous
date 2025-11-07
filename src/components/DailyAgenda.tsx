@@ -6,6 +6,7 @@ import { useVisitActions } from "@/hooks/useVisitActions";
 import { useVisitModal } from "@/hooks/useVisitModal";
 import type { Visit } from "@/types/visit";
 import { formatDateLong } from "@/utils/dateFormatting";
+import { calculateDepartureTime } from "@/utils/timeUtils";
 import ErrorAlert from "@/components/ui/ErrorAlert";
 
 import BookingModal from "./BookingModal";
@@ -137,18 +138,28 @@ export default function DailyAgenda({
 						<EmptyVisitsState isLoading={isLoading} error={error} />
 					))}
 
-				{isDateBlocked && blockedTimeslot && (
-					<div className="alert alert-warning mb-4" role="alert">
-						<strong>Deze dag is geblokkeerd:</strong> {blockedTimeslot.message}
-					</div>
-				)}
+				{isDateBlocked && blockedTimeslot && (() => {
+					const endTime = calculateDepartureTime(
+						blockedTimeslot.time,
+						blockedTimeslot.durationMinutes,
+					);
+					return (
+						<div className="alert alert-warning mb-4" role="alert">
+							<strong>Deze dag is geblokkeerd:</strong> {blockedTimeslot.message}
+							<br />
+							<small className="text-muted">
+								Van {blockedTimeslot.time} tot {endTime}
+							</small>
+						</div>
+					);
+				})()}
 
 				<div className="mt-5">
 					<button
 						type="button"
 						className="btn btn-primary w-100"
 						onClick={() => openModal()}
-						disabled={isLoading || isDateBlocked}
+						disabled={isLoading}
 						style={{
 							fontSize: "1.0625rem",
 							fontWeight: "600",

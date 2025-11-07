@@ -64,10 +64,10 @@ export default function CalendarGrid({
 				key={day}
 				type="button"
 				className={`calendar-day ${isPast ? "past" : ""} ${isSelected ? "selected" : ""} ${hasVisits ? "has-visits" : ""} ${isBlocked ? "blocked" : ""} ${isToday ? "today" : ""}`}
-				onClick={() => !isPast && !isBlocked && onDateClick(day)}
-				disabled={isPast || isBlocked}
+				onClick={() => !isPast && onDateClick(day)}
+				disabled={isPast}
 				onKeyDown={(e) => {
-					if (!isPast && !isBlocked && (e.key === "Enter" || e.key === " ")) {
+					if (!isPast && (e.key === "Enter" || e.key === " ")) {
 						e.preventDefault();
 						onDateClick(day);
 					}

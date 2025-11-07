@@ -1,6 +1,7 @@
 export interface BlockedTimeslot {
 	id: string;
 	date: string;
+	time: string;
 	durationMinutes: number;
 	message: string;
 }
