@@ -1,5 +1,6 @@
 import { useEffect, useMemo, useState } from "react";
 import { useVisits } from "@/hooks/useVisits";
+import { useBlockedTimeslots } from "@/hooks/useBlockedTimeslots";
 import {
 	createDateForDay,
 	formatDateString,
@@ -22,11 +23,18 @@ export default function VisitCalendar({
 		parseDateString(selectedDate),
 	);
 	const { visits, isLoading: visitsLoading } = useVisits();
+	const { blockedTimeslots, isLoading: blockedLoading } = useBlockedTimeslots();
 
 	// Memoize processed visit dates
 	const visitDates = useMemo(
 		() => new Set(visits.map((visit) => visit.date)),
 		[visits],
+	);
+
+	// Memoize processed blocked dates
+	const blockedDates = useMemo(
+		() => new Set(blockedTimeslots.map((blocked) => blocked.date)),
+		[blockedTimeslots],
 	);
 
 	const todayStr = getTodayDateString();
@@ -109,7 +117,7 @@ export default function VisitCalendar({
 					De agenda wordt direct bijgewerkt wanneer je bladert.
 				</p>
 			</header>
-			{visitsLoading ? (
+			{visitsLoading || blockedLoading ? (
 				<div className="text-center py-4">
 					<span className="text-secondary">Agenda laden...</span>
 				</div>
@@ -125,6 +133,7 @@ export default function VisitCalendar({
 						selectedDate={selectedDate}
 						todayStr={todayStr}
 						visitDates={visitDates}
+						blockedDates={blockedDates}
 						onDateClick={handleDateClick}
 					/>
 				</div>

@@ -1,6 +1,7 @@
 import { useMemo, useEffect } from "react";
 import { useCurrentUserId } from "@/hooks/useCurrentUserId";
 import { useDailyVisits } from "@/hooks/useDailyVisits";
+import { useBlockedTimeslots } from "@/hooks/useBlockedTimeslots";
 import { useVisitActions } from "@/hooks/useVisitActions";
 import { useVisitModal } from "@/hooks/useVisitModal";
 import type { Visit } from "@/types/visit";
@@ -21,10 +22,20 @@ export default function DailyAgenda({
 	onDateChange,
 }: DailyAgendaProps) {
 	const { dailyVisits, isLoading, error } = useDailyVisits(selectedDate);
+	const { blockedTimeslots } = useBlockedTimeslots();
 	const currentUserId = useCurrentUserId();
 	const { isOpen, editingVisit, openModal, closeModal, editVisit } =
 		useVisitModal();
 	const { deleteVisit, deletingVisitId } = useVisitActions();
+
+	// Check if the selected date is blocked
+	const isDateBlocked = useMemo(() => {
+		return blockedTimeslots.some((blocked) => blocked.date === selectedDate);
+	}, [blockedTimeslots, selectedDate]);
+
+	const blockedTimeslot = useMemo(() => {
+		return blockedTimeslots.find((blocked) => blocked.date === selectedDate);
+	}, [blockedTimeslots, selectedDate]);
 
 	// Sync selectedDate when editingVisit changes - if the visit being edited
 	// is on a different date than selectedDate, update selectedDate to match
@@ -126,12 +137,18 @@ export default function DailyAgenda({
 						<EmptyVisitsState isLoading={isLoading} error={error} />
 					))}
 
+				{isDateBlocked && blockedTimeslot && (
+					<div className="alert alert-warning mb-4" role="alert">
+						<strong>Deze dag is geblokkeerd:</strong> {blockedTimeslot.message}
+					</div>
+				)}
+
 				<div className="mt-5">
 					<button
 						type="button"
 						className="btn btn-primary w-100"
 						onClick={() => openModal()}
-						disabled={isLoading}
+						disabled={isLoading || isDateBlocked}
 						style={{
 							fontSize: "1.0625rem",
 							fontWeight: "600",

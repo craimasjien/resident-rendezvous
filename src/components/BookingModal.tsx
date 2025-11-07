@@ -3,6 +3,7 @@ import { createPortal } from "react-dom";
 
 import { getVisitsCollection } from "@/firebase/visitsCollection";
 import { useCurrentUserId } from "@/hooks/useCurrentUserId";
+import { useBlockedTimeslots } from "@/hooks/useBlockedTimeslots";
 import { useVisitForm } from "@/hooks/useVisitForm";
 import type { Visit, VisitWriteData } from "@/types/visit";
 import { sanitizeText } from "@/utils/sanitize";
@@ -27,6 +28,7 @@ export default function BookingModal({
 	onVisitCreated,
 }: BookingModalProps) {
 	const userId = useCurrentUserId();
+	const { blockedTimeslots } = useBlockedTimeslots();
 	const {
 		formState,
 		error,
@@ -45,12 +47,28 @@ export default function BookingModal({
 		editingVisit?.id,
 	);
 
+	// Check if the selected date is blocked
+	const isDateBlocked = blockedTimeslots.some(
+		(blocked) => blocked.date === formState.date,
+	);
+	const blockedTimeslot = blockedTimeslots.find(
+		(blocked) => blocked.date === formState.date,
+	);
+
 	const handleSubmit = async (e: React.FormEvent) => {
 		e.preventDefault();
 		setGeneralError(null);
 
 		if (!userId) {
 			setGeneralError("Je moet ingelogd zijn om een bezoek te plannen");
+			return;
+		}
+
+		// Check if the date is blocked
+		if (isDateBlocked && blockedTimeslot) {
+			setGeneralError(
+				`Deze dag is geblokkeerd: ${blockedTimeslot.message}. Je kunt geen bezoek plannen op deze dag.`,
+			);
 			return;
 		}
 

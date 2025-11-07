@@ -10,6 +10,7 @@ interface CalendarGridProps {
 	selectedDate: string;
 	todayStr: string;
 	visitDates: Set<string>;
+	blockedDates: Set<string>;
 	onDateClick: (day: number) => void;
 }
 
@@ -18,6 +19,7 @@ export default function CalendarGrid({
 	selectedDate,
 	todayStr,
 	visitDates,
+	blockedDates,
 	onDateClick,
 }: CalendarGridProps) {
 	const daysInMonth = getDaysInMonth(currentMonth);
@@ -54,23 +56,28 @@ export default function CalendarGrid({
 		const isToday = dateStr === todayStr;
 		const isSelected = dateStr === selectedDate;
 		const hasVisits = visitDates.has(dateStr);
+		const isBlocked = blockedDates.has(dateStr);
 		const isPast = dateStr < todayStr;
 
 		cells.push(
 			<button
 				key={day}
 				type="button"
-				className={`calendar-day ${isPast ? "past" : ""} ${isSelected ? "selected" : ""} ${hasVisits ? "has-visits" : ""} ${isToday ? "today" : ""}`}
-				onClick={() => !isPast && onDateClick(day)}
-				disabled={isPast}
+				className={`calendar-day ${isPast ? "past" : ""} ${isSelected ? "selected" : ""} ${hasVisits ? "has-visits" : ""} ${isBlocked ? "blocked" : ""} ${isToday ? "today" : ""}`}
+				onClick={() => !isPast && !isBlocked && onDateClick(day)}
+				disabled={isPast || isBlocked}
 				onKeyDown={(e) => {
-					if (!isPast && (e.key === "Enter" || e.key === " ")) {
+					if (!isPast && !isBlocked && (e.key === "Enter" || e.key === " ")) {
 						e.preventDefault();
 						onDateClick(day);
 					}
 				}}
 				aria-label={
-					isPast ? `Past date: ${dateStr}` : `Select date: ${dateStr}`
+					isPast 
+						? `Past date: ${dateStr}` 
+						: isBlocked 
+							? `Blocked date: ${dateStr}` 
+							: `Select date: ${dateStr}`
 				}
 			>
 				<span className="day-number">{day}</span>
