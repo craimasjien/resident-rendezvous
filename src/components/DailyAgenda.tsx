@@ -115,6 +115,22 @@ export default function DailyAgenda({
 					/>
 				)}
 
+				{isDateBlocked && blockedTimeslot && (() => {
+					const endTime = calculateDepartureTime(
+						blockedTimeslot.time,
+						blockedTimeslot.durationMinutes,
+					);
+					return (
+						<div className="alert alert-danger mb-4" role="alert">
+							<strong>Deze dag is (deels) geblokkeerd:</strong> {blockedTimeslot.message}
+							<br />
+							<small className="text-muted">
+								Van {blockedTimeslot.time} tot {endTime}
+							</small>
+						</div>
+					);
+				})()}
+
 				{!isLoading &&
 					!error &&
 					(dailyVisits.length > 0 ? (
@@ -137,22 +153,6 @@ export default function DailyAgenda({
 					) : (
 						<EmptyVisitsState isLoading={isLoading} error={error} />
 					))}
-
-				{isDateBlocked && blockedTimeslot && (() => {
-					const endTime = calculateDepartureTime(
-						blockedTimeslot.time,
-						blockedTimeslot.durationMinutes,
-					);
-					return (
-						<div className="alert alert-warning mb-4" role="alert">
-							<strong>Deze dag is geblokkeerd:</strong> {blockedTimeslot.message}
-							<br />
-							<small className="text-muted">
-								Van {blockedTimeslot.time} tot {endTime}
-							</small>
-						</div>
-					);
-				})()}
 
 				<div className="mt-5">
 					<button
