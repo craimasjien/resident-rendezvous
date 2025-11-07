@@ -1,13 +1,15 @@
 import { useMemo } from 'react'
 import { createFileRoute } from '@tanstack/react-router'
-import { Calendar, Clock, User } from 'lucide-react'
+import { Calendar, Clock, User, AlertTriangle } from 'lucide-react'
 
 import { useVisits } from '@/hooks/useVisits'
+import { useBlockedTimeslots } from '@/hooks/useBlockedTimeslots'
 import type { Visit } from '@/types/visit'
 import EmptyVisitsState from '@/components/visits/EmptyVisitsState'
 import ErrorAlert from '@/components/ui/ErrorAlert'
 import { formatDateLong } from '@/utils/dateFormatting'
 import { sortVisitsByDateAndTime } from '@/utils/visitUtils'
+import { calculateDepartureTime } from '@/utils/timeUtils'
 
 export const Route = createFileRoute('/upcoming-visits')({
 	component: UpcomingVisitsRoute,
@@ -15,6 +17,7 @@ export const Route = createFileRoute('/upcoming-visits')({
 
 function UpcomingVisitsRoute() {
 	const { visits, isLoading, error } = useVisits()
+	const { blockedTimeslots, isLoading: blockedLoading } = useBlockedTimeslots()
 
 	// Group visits by date
 	const visitsByDate = useMemo(() => {
@@ -42,6 +45,34 @@ function UpcomingVisitsRoute() {
 		return result
 	}, [visits])
 
+	// Group blocked timeslots by date
+	const blockedByDate = useMemo(() => {
+		const grouped = new Map<string, Array<typeof blockedTimeslots[0]>>()
+		
+		blockedTimeslots.forEach(blocked => {
+			const dateKey = blocked.date
+			if (!grouped.has(dateKey)) {
+				grouped.set(dateKey, [])
+			}
+			grouped.get(dateKey)!.push(blocked)
+		})
+
+		return grouped
+	}, [blockedTimeslots])
+
+	// Combine visits and blocked timeslots by date
+	const datesWithContent = useMemo(() => {
+		const dateSet = new Set<string>()
+		visits.forEach(v => dateSet.add(v.date))
+		blockedTimeslots.forEach(b => dateSet.add(b.date))
+		
+		return Array.from(dateSet).sort().map(date => ({
+			date,
+			visits: visitsByDate.find(v => v.date === date)?.visits || [],
+			blocked: blockedByDate.get(date) || []
+		}))
+	}, [visits, blockedTimeslots, visitsByDate, blockedByDate])
+
 	return (
 		<>
 			<div className="upcoming-visits-route">
@@ -68,13 +99,13 @@ function UpcomingVisitsRoute() {
 					/>
 				)}
 
-				{!isLoading && !error && visits.length === 0 && (
+				{!isLoading && !blockedLoading && !error && visits.length === 0 && blockedTimeslots.length === 0 && (
 					<EmptyVisitsState isLoading={isLoading} error={error} />
 				)}
 
-				{!isLoading && !error && visits.length > 0 && (
+				{!isLoading && !blockedLoading && !error && (visits.length > 0 || blockedTimeslots.length > 0) && (
 					<div style={{ display: 'flex', flexDirection: 'column', gap: '1.5rem' }}>
-						{visitsByDate.map(({ date, visits: dayVisits }) => (
+						{datesWithContent.map(({ date, visits: dayVisits, blocked }) => (
 							<div key={date} style={{
 								background: 'white',
 								borderRadius: 'var(--radius-lg)',
@@ -99,6 +130,59 @@ function UpcomingVisitsRoute() {
 									</div>
 								</div>
 								<div style={{ padding: '0.5rem' }}>
+									{blocked.length > 0 && blocked.map(blockedTimeslot => {
+										const endTime = calculateDepartureTime(
+											blockedTimeslot.time,
+											blockedTimeslot.durationMinutes,
+										);
+										return (
+											<div
+												key={blockedTimeslot.id}
+												className="d-flex align-items-center"
+												style={{
+													padding: '0.75rem 1rem',
+													marginBottom: '0.5rem',
+													borderRadius: 'var(--radius-md)',
+													background: 'linear-gradient(135deg, rgba(245, 158, 11, 0.1) 0%, rgba(251, 191, 36, 0.1) 100%)',
+													border: '1px solid rgba(245, 158, 11, 0.3)',
+													borderLeft: '4px solid var(--warning)'
+												}}
+											>
+												<div style={{
+													width: '36px',
+													height: '36px',
+													borderRadius: '8px',
+													background: 'rgba(245, 158, 11, 0.2)',
+													display: 'flex',
+													alignItems: 'center',
+													justifyContent: 'center',
+													marginRight: '0.75rem',
+													flexShrink: 0
+												}}>
+													<AlertTriangle size={16} style={{ color: 'var(--warning)' }} />
+												</div>
+												<div style={{ flex: 1, minWidth: 0 }}>
+													<div className="d-flex align-items-center" style={{ marginBottom: '0.25rem' }}>
+														<span style={{ 
+															fontWeight: '600',
+															color: 'var(--gray-900)',
+															marginRight: '1rem',
+															minWidth: '120px',
+															flexShrink: 0
+														}}>
+															{blockedTimeslot.time} - {endTime}
+														</span>
+														<span style={{ 
+															color: 'var(--gray-700)',
+															fontSize: '0.9rem'
+														}}>
+															{blockedTimeslot.message}
+														</span>
+													</div>
+												</div>
+											</div>
+										);
+									})}
 									{dayVisits.map(visit => (
 										<div
 											key={visit.id}
@@ -158,7 +242,7 @@ function UpcomingVisitsRoute() {
 					</div>
 				)}
 
-				{isLoading && (
+				{(isLoading || blockedLoading) && (
 					<div className="text-center" style={{ padding: '3rem' }}>
 						<p className="text-muted">Bezoeken laden...</p>
 					</div>
