@@ -12,23 +12,11 @@ export interface Visit {
 	description?: string;
 	durationMinutes: number;
 	userId: string;
+	verified?: boolean;
 }
 
 export type VisitWriteData = Omit<Visit, "id">;
 
-const resolveAppId = (overrideAppId?: string) => {
-	const appId = overrideAppId ?? import.meta.env.VITE_FIREBASE_APP_ID;
-
-	if (!appId) {
-		throw new Error(
-			"VITE_FIREBASE_APP_ID is required to resolve the visits collection path.",
-		);
-	}
-
-	return appId;
-};
-
-export const getVisitsCollectionPath = (appId?: string) =>
-	`artifacts/${resolveAppId(appId)}/public/data/visits`;
+export const getVisitsCollectionPath = () => "visits";
 
 export const VISIT_LOCAL_TIME_ZONE = "Europe/Amsterdam" as const;

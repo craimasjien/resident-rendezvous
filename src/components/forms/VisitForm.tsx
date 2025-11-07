@@ -1,6 +1,8 @@
 import { useId } from "react";
 import type { VisitFormState } from "@/hooks/useVisitForm";
 import type { Visit } from "@/types/visit";
+import LoadingSpinner from "@/components/ui/LoadingSpinner";
+import ErrorAlert from "@/components/ui/ErrorAlert";
 
 interface VisitFormProps {
 	formState: VisitFormState;
@@ -50,11 +52,7 @@ export default function VisitForm({
 				</div>
 				)}
 
-				{error && (
-					<div className="alert alert-danger mb-4" role="alert">
-						{error}
-					</div>
-				)}
+				{error && <ErrorAlert message={error} />}
 
 				<div className="mb-3">
 					<label htmlFor={visitorNameId} className="form-label">
@@ -140,13 +138,7 @@ export default function VisitForm({
 					className={`btn btn-primary ${isSubmitting ? "disabled" : ""}`}
 					disabled={isSubmitting || conflict !== null}
 				>
-					{isSubmitting && (
-						<span
-							className="spinner-border spinner-border-sm me-2"
-							role="status"
-							aria-hidden="true"
-						></span>
-					)}
+					{isSubmitting && <LoadingSpinner />}
 					{isEditing ? "Bezoek bijwerken" : "Bezoek inplannen"}
 				</button>
 				<button

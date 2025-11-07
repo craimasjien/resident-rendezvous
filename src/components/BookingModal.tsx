@@ -9,6 +9,7 @@ import { sanitizeText } from "@/utils/sanitize";
 import VisitForm from "./forms/VisitForm";
 import { useDailyVisits } from "@/hooks/useDailyVisits";
 import { checkSameDayVisit } from "@/utils/visitValidation";
+import { getCurrentUser } from "@/firebaseClient";
 
 interface BookingModalProps {
 	isOpen: boolean;
@@ -62,6 +63,11 @@ export default function BookingModal({
 		setSubmitting(true);
 
 		try {
+			// Check if user authenticated with Google
+			const currentUser = getCurrentUser();
+			const isGoogleAuth = currentUser && !currentUser.isAnonymous && 
+				currentUser.providerData.some(provider => provider.providerId === 'google.com');
+			
 			const visitData: VisitWriteData = {
 				date: formState.date,
 				time: formState.time,
@@ -71,6 +77,7 @@ export default function BookingModal({
 					? sanitizeText(formState.description.trim())
 					: "",
 				userId,
+				verified: isGoogleAuth || false,
 			};
 
 			const collectionRef = getVisitsCollection();

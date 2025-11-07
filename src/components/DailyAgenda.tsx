@@ -5,6 +5,7 @@ import { useVisitActions } from "@/hooks/useVisitActions";
 import { useVisitModal } from "@/hooks/useVisitModal";
 import type { Visit } from "@/types/visit";
 import { formatDateLong } from "@/utils/dateFormatting";
+import ErrorAlert from "@/components/ui/ErrorAlert";
 
 import BookingModal from "./BookingModal";
 import VisitCard from "./VisitCard";
@@ -97,10 +98,9 @@ export default function DailyAgenda({
 				</header>
 
 				{error && (
-					<div className="alert alert-danger mb-4" role="alert">
-						<strong>Het laden van de bezoeken is mislukt:</strong>{" "}
-						{error.message}
-					</div>
+					<ErrorAlert
+						message={`Het laden van de bezoeken is mislukt: ${error.message}`}
+					/>
 				)}
 
 				{!isLoading &&

@@ -1,11 +1,4 @@
-import {
-	collection,
-	type FirestoreDataConverter,
-	getFirestore,
-	type QueryDocumentSnapshot,
-	type SnapshotOptions,
-	type WithFieldValue,
-} from "firebase/firestore";
+import { collection, getFirestore } from "firebase/firestore";
 
 import { getFirebaseApp } from "@/firebaseClient";
 import {
@@ -13,25 +6,9 @@ import {
 	type Visit,
 	type VisitWriteData,
 } from "@/types/visit";
+import { createConverter } from "./converterFactory";
 
-export const visitConverter: FirestoreDataConverter<Visit, VisitWriteData> = {
-	toFirestore(visit) {
-		const { id: _ignoreId, ...rest } = visit as Visit;
-
-		return rest as WithFieldValue<VisitWriteData>;
-	},
-	fromFirestore(
-		snapshot: QueryDocumentSnapshot<VisitWriteData>,
-		options?: SnapshotOptions,
-	) {
-		const data = snapshot.data(options);
-
-		return {
-			id: snapshot.id,
-			...data,
-		};
-	},
-};
+export const visitConverter = createConverter<Visit, VisitWriteData>();
 
 export const getVisitsCollection = () => {
 	const app = getFirebaseApp();
