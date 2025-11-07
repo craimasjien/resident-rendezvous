@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import type React from "react";
+import React from "react";
 import { useVisits } from "./useVisits";
 import type { Visit } from "@/types/visit";
 import { validateVisit } from "@/utils/visitValidation";
