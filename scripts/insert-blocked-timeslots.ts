@@ -1,7 +1,7 @@
 import "dotenv/config";
 import { initializeApp } from "firebase/app";
 import { getAuth, signInAnonymously } from "firebase/auth";
-import { addDoc, collection, getFirestore } from "firebase/firestore";
+import { addDoc, collection, getDocs, getFirestore, query, where } from "firebase/firestore";
 
 import { getBlockedTimeslotsCollectionPath } from "@/types/blockedTimeslot";
 import { createConverter } from "@/firebase/converterFactory";
@@ -127,6 +127,25 @@ async function insertBlockedTimeslots() {
 				durationMinutes: extractDurationMinutes(timeslot.duration),
 				message: timeslot.description,
 			};
+
+			// Check if a blocked timeslot with the same date, time, duration, and message already exists
+			const existingQuery = query(
+				blockedTimeslotsCollection,
+				where("date", "==", writeData.date),
+				where("time", "==", writeData.time),
+				where("durationMinutes", "==", writeData.durationMinutes),
+				where("message", "==", writeData.message),
+			);
+
+			const existingDocs = await getDocs(existingQuery);
+
+			if (!existingDocs.empty) {
+				const existingDoc = existingDocs.docs[0];
+				console.log(
+					`⊘ Skipped (already exists): ${timeslot.date} ${timeslot.time} (${timeslot.duration}) - ${timeslot.description} [ID: ${existingDoc.id}]`,
+				);
+				continue;
+			}
 
 			const docRef = await addDoc(blockedTimeslotsCollection, writeData);
 			console.log(
