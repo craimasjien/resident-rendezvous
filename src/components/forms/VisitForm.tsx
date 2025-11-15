@@ -53,17 +53,19 @@ export default function VisitForm({
 							<br />
 							<strong>Geblokkeerde periodes op deze dag:</strong>
 							<ul className="mb-0 mt-2">
-								{blockedTimeslots.map((blocked) => {
-									const endTime = calculateDepartureTime(
-										blocked.time,
-										blocked.durationMinutes,
-									);
-									return (
-										<li key={blocked.id}>
-											{blocked.message} ({blocked.time} - {endTime})
-										</li>
-									);
-								})}
+								{blockedTimeslots
+									.sort((a, b) => a.time.localeCompare(b.time))
+									.map((blocked) => {
+										const endTime = calculateDepartureTime(
+											blocked.time,
+											blocked.durationMinutes,
+										);
+										return (
+											<li key={blocked.id}>
+												{blocked.message} ({blocked.time} - {endTime})
+											</li>
+										);
+									})}
 							</ul>
 						</>
 					)}
