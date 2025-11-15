@@ -29,14 +29,17 @@ export default function DailyAgenda({
 		useVisitModal();
 	const { deleteVisit, deletingVisitId } = useVisitActions();
 
-	// Check if the selected date is blocked
-	const isDateBlocked = useMemo(() => {
-		return blockedTimeslots.some((blocked) => blocked.date === selectedDate);
+	// Get all blocked timeslots for the selected date, sorted by start time ascending
+	const blockedTimeslotsForDate = useMemo(() => {
+		return blockedTimeslots
+			.filter((blocked) => blocked.date === selectedDate)
+			.sort((a, b) => a.time.localeCompare(b.time));
 	}, [blockedTimeslots, selectedDate]);
 
-	const blockedTimeslot = useMemo(() => {
-		return blockedTimeslots.find((blocked) => blocked.date === selectedDate);
-	}, [blockedTimeslots, selectedDate]);
+	// Check if the selected date is blocked
+	const isDateBlocked = useMemo(() => {
+		return blockedTimeslotsForDate.length > 0;
+	}, [blockedTimeslotsForDate]);
 
 	// Sync selectedDate when editingVisit changes - if the visit being edited
 	// is on a different date than selectedDate, update selectedDate to match
@@ -126,13 +129,13 @@ export default function DailyAgenda({
 					/>
 				)}
 
-				{isDateBlocked && blockedTimeslot && (() => {
+				{isDateBlocked && blockedTimeslotsForDate.map((blockedTimeslot) => {
 					const endTime = calculateDepartureTime(
 						blockedTimeslot.time,
 						blockedTimeslot.durationMinutes,
 					);
 					return (
-						<div className="alert alert-danger mb-4" role="alert">
+						<div key={blockedTimeslot.id} className="alert alert-danger mb-4" role="alert">
 							<strong>Deze dag is (deels) geblokkeerd:</strong> {blockedTimeslot.message}
 							<br />
 							<small className="text-muted">
@@ -140,7 +143,7 @@ export default function DailyAgenda({
 							</small>
 						</div>
 					);
-				})()}
+				})}
 
 				{!isLoading &&
 					!error &&
