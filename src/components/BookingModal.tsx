@@ -57,9 +57,9 @@ export default function BookingModal({
 
 	const conflict = getValidationError();
 
-	// Check for blocked timeslot conflicts in real-time
-	useEffect(() => {
-		if (isSubmitting || !formState.time || !formState.date) return;
+	// Check for actual blocked timeslot conflicts (not just informational)
+	const blockedTimeslotConflict = useMemo(() => {
+		if (!formState.time || !formState.date) return null;
 
 		const conflictingBlockedTimeslot = blockedTimeslotsForDate.find((blocked) =>
 			checkBlockedTimeslotConflict(
@@ -75,9 +75,23 @@ export default function BookingModal({
 				conflictingBlockedTimeslot.time,
 				conflictingBlockedTimeslot.durationMinutes,
 			);
-			setGeneralError(
-				<><strong>Je kunt geen bezoek plannen tijdens een geblokkeerde periode van ({conflictingBlockedTimeslot.time} - {endTime})</strong>. Kies een andere tijd.</>,
-			);
+			return `Je kunt geen bezoek plannen tijdens een geblokkeerde periode van (${conflictingBlockedTimeslot.time} - ${endTime}). Kies een andere tijd.`;
+		}
+
+		return null;
+	}, [
+		formState.date,
+		formState.time,
+		formState.durationMinutes,
+		blockedTimeslotsForDate,
+	]);
+
+	// Check for blocked timeslot conflicts in real-time
+	useEffect(() => {
+		if (isSubmitting) return;
+
+		if (blockedTimeslotConflict) {
+			setGeneralError(blockedTimeslotConflict);
 		} else {
 			// No conflict with blocked timeslots - clear the blocked timeslot error if it exists
 			// Check if error is a React element (blocked timeslot error) or a string containing "geblokkeerde periode"
@@ -98,17 +112,15 @@ export default function BookingModal({
 			}
 		}
 	}, [
-		formState.date,
-		formState.time,
-		formState.durationMinutes,
-		blockedTimeslotsForDate,
+		blockedTimeslotConflict,
 		isSubmitting,
 		error,
 		getValidationError,
 		setGeneralError,
 	]);
 
-	// Combine conflict message with blocked timeslot info
+	// Combine conflict messages - only include actual conflicts (not just informational blocked timeslots)
+	// Note: Blocked timeslots are already shown as informational in VisitForm.tsx
 	const combinedError = useMemo(() => {
 		const parts: string[] = [];
 
@@ -116,20 +128,12 @@ export default function BookingModal({
 			parts.push(conflict);
 		}
 
-		// Always show all blocked timeslots for the day
-		if (blockedTimeslotsForDate.length > 0) {
-			const blockedParts = blockedTimeslotsForDate.map((blocked) => {
-				const endTime = calculateDepartureTime(
-					blocked.time,
-					blocked.durationMinutes,
-				);
-				return `${blocked.message} (${blocked.time} - ${endTime})`;
-			});
-			parts.push(`Geblokkeerde periodes: ${blockedParts.join(", ")}`);
+		if (blockedTimeslotConflict) {
+			parts.push(blockedTimeslotConflict);
 		}
 
 		return parts.length > 0 ? parts.join(" | ") : null;
-	}, [conflict, blockedTimeslotsForDate]);
+	}, [conflict, blockedTimeslotConflict]);
 
 	const handleSubmit = async (e: React.FormEvent) => {
 		e.preventDefault();
